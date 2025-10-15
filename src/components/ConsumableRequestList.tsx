@@ -66,10 +66,10 @@ const ConsumableRequestList: React.FC = () => {
     switch (status) {
       case 'Pending':
         return { text: 'Pending', classes: 'bg-yellow-100 text-yellow-800' };
-      case 'Approved by Headmaster': // This status will be changed to 'Disetujui' by Headmaster
+      case 'Approved by Headmaster': // Old status, will be replaced by 'Disetujui'
       case 'Disetujui':
         return { text: 'Disetujui', classes: 'bg-blue-100 text-blue-800' };
-      case 'Approved': // This status will be changed to 'Diproses' by Admin
+      case 'Approved': // Old status, will be replaced by 'Diproses'
       case 'Diproses':
         return { text: 'Diproses', classes: 'bg-green-100 text-green-800' };
       case 'Rejected':

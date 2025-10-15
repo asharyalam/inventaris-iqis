@@ -155,8 +155,7 @@ const BorrowRequestsAdminPage: React.FC = () => {
     switch (status) {
       case 'Pending':
         return { text: 'Pending', classes: 'bg-yellow-100 text-yellow-800' };
-      case 'Disetujui Kepala Sekolah': // This status will be changed to 'Disetujui' by Headmaster
-      case 'Disetujui':
+      case 'Disetujui': // Updated from 'Disetujui Kepala Sekolah'
         return { text: 'Disetujui', classes: 'bg-blue-100 text-blue-800' };
       case 'Diproses':
         return { text: 'Diproses', classes: 'bg-green-100 text-green-800' };
