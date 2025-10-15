@@ -27,9 +27,9 @@ const navItems: NavItem[] = [
   { title: "Permintaan Peminjaman", href: "/borrow-requests", icon: Handshake, roles: ["Pengguna"] },
   { title: "Manajemen Barang", href: "/admin/items", icon: Package, roles: ["Admin"] },
   { title: "Tambah Barang Baru", href: "/admin/add-item", icon: PlusCircle, roles: ["Admin"] },
-  { title: "Manajemen Peminjaman", href: "/admin/borrow-requests", icon: Handshake, roles: ["Admin", "Kepala Sekolah"] }, // Diperbarui
-  { title: "Manajemen Pengembalian", href: "/admin/return-requests", icon: History, roles: ["Admin"] }, // Diperbarui
-  { title: "Manajemen Permintaan Barang Habis Pakai", href: "/admin/consumable-requests", icon: Package, roles: ["Admin", "Kepala Sekolah"] }, // Diperbarui: Admin juga bisa melihat
+  { title: "Manajemen Peminjaman", href: "/admin/borrow-requests", icon: Handshake, roles: ["Admin", "Kepala Sekolah"] },
+  { title: "Manajemen Pengembalian", href: "/admin/return-requests", icon: History, roles: ["Admin"] },
+  { title: "Manajemen Permintaan", href: "/admin/consumable-requests", icon: Package, roles: ["Admin", "Kepala Sekolah"] }, // Diperbarui
   { title: "Manajemen Pengguna", href: "/admin/users", icon: Users, roles: ["Admin"] },
   { title: "Pemantauan & Pelaporan", href: "/admin/monitoring-reporting", icon: BarChart3, roles: ["Kepala Sekolah"] },
 ];
