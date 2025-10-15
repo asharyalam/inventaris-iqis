@@ -20,14 +20,15 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { title: "Dashboard", href: "/dashboard", icon: Home, roles: ["Pengguna", "Admin", "Kepala Sekolah"] },
+  { title: "Dashboard", href: "/dashboard", icon: Home, roles: ["Pengguna"] },
+  { title: "Dashboard", href: "/admin/dashboard", icon: Home, roles: ["Admin", "Kepala Sekolah"] },
   { title: "Profil", href: "/profile", icon: UserIcon, roles: ["Pengguna", "Admin"] },
   { title: "Permintaan Habis Pakai", href: "/consumable-requests", icon: Package, roles: ["Pengguna"] },
   { title: "Permintaan Peminjaman", href: "/borrow-requests", icon: Handshake, roles: ["Pengguna"] },
   { title: "Manajemen Barang", href: "/admin/items", icon: Package, roles: ["Admin"] },
   { title: "Tambah Barang Baru", href: "/admin/add-item", icon: PlusCircle, roles: ["Admin"] },
   { title: "Manajemen Persetujuan Peminjaman", href: "/admin/borrow-requests", icon: Handshake, roles: ["Admin", "Kepala Sekolah"] },
-  { title: "Manajemen Persetujuan Pengembalian", href: "/admin/return-requests", icon: History, roles: ["Admin"] }, // Diperbarui: Dihapus 'Kepala Sekolah'
+  { title: "Manajemen Persetujuan Pengembalian", href: "/admin/return-requests", icon: History, roles: ["Admin"] },
   { title: "Manajemen Persetujuan Habis Pakai", href: "/admin/consumable-requests", icon: Package, roles: ["Admin", "Kepala Sekolah"] },
   { title: "Manajemen Pengguna", href: "/admin/users", icon: Users, roles: ["Admin"] },
   { title: "Pemantauan & Pelaporan", href: "/admin/monitoring-reporting", icon: BarChart3, roles: ["Admin", "Kepala Sekolah"] },
@@ -38,17 +39,7 @@ const SidebarContent: React.FC<{ userRole: string | null; closeSheet?: () => voi
 
   const filteredNavItems = navItems.filter(item =>
     item.roles.includes(userRole || 'Pengguna')
-  ).map(item => {
-    // Adjust dashboard link based on role
-    if (item.title === "Dashboard") {
-      if (userRole === "Admin" || userRole === "Kepala Sekolah") {
-        return { ...item, href: "/admin/dashboard" };
-      } else {
-        return { ...item, href: "/dashboard" };
-      }
-    }
-    return item;
-  });
+  );
 
   return (
     <ScrollArea className="h-full px-3 py-4">
@@ -58,7 +49,7 @@ const SidebarContent: React.FC<{ userRole: string | null; closeSheet?: () => voi
           const isActive = location.pathname === item.href;
           return (
             <Link
-              key={item.title}
+              key={item.href} {/* Diperbarui: Menggunakan item.href sebagai kunci */}
               to={item.href}
               onClick={closeSheet}
               className={cn(
