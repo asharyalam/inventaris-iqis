@@ -176,6 +176,11 @@ const AppLayout: React.FC = () => {
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
           <Outlet />
         </main>
+
+        {/* Footer */}
+        <footer className="border-t bg-muted/40 p-4 text-center text-sm text-gray-600 dark:text-gray-400">
+          Created by Ashary
+        </footer>
       </div>
     </div>
   );
