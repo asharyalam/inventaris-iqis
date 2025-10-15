@@ -90,6 +90,7 @@ const ConsumableRequestForm: React.FC = () => {
       form.reset();
       queryClient.invalidateQueries({ queryKey: ['consumableRequests'] });
       queryClient.invalidateQueries({ queryKey: ['availableItems'] }); // Invalidate to update available quantity
+      queryClient.invalidateQueries({ queryKey: ['adminConsumableRequests'] }); // Invalidate for Headmaster/Admin view
     }
     setIsSubmitting(false);
   };

@@ -105,6 +105,7 @@ const BorrowRequestsAdminPage: React.FC = () => {
           }
         }
       }
+      queryClient.invalidateQueries({ queryKey: ['borrowRequests', selectedRequest.user_id] }); // Invalidate user's specific borrow requests
       refetch();
       setIsDialogOpen(false);
       setSelectedRequest(null);

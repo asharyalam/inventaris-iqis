@@ -103,6 +103,7 @@ const AdminConsumableRequestsPage: React.FC = () => {
           }
         }
       }
+      queryClient.invalidateQueries({ queryKey: ['consumableRequests', selectedRequest.user_id] }); // Invalidate user's specific consumable requests
       refetch();
       setIsDialogOpen(false);
       setSelectedRequest(null);

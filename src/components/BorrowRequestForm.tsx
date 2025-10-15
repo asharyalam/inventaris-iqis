@@ -98,6 +98,7 @@ const BorrowRequestForm: React.FC = () => {
       form.reset();
       queryClient.invalidateQueries({ queryKey: ['borrowRequests'] });
       queryClient.invalidateQueries({ queryKey: ['availableItemsForBorrow'] }); // Invalidate to update available quantity
+      queryClient.invalidateQueries({ queryKey: ['adminBorrowRequests'] }); // Invalidate for Headmaster/Admin view
     }
     setIsSubmitting(false);
   };
