@@ -6,13 +6,13 @@ import { useSession } from "@/components/SessionContextProvider";
 import { MadeWithDyad } from "@/components/made-with-dyad";
 
 const Index = () => {
-  const { session, isLoading, isAdmin } = useSession();
+  const { session, isLoading, canAccessAdminDashboard } = useSession(); // Updated to use canAccessAdminDashboard
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!isLoading) {
       if (session) {
-        if (isAdmin) {
+        if (canAccessAdminDashboard) { // Use the new flag for redirection
           navigate('/admin/dashboard', { replace: true });
         } else {
           navigate('/dashboard', { replace: true });
@@ -21,7 +21,7 @@ const Index = () => {
         navigate('/login', { replace: true });
       }
     }
-  }, [session, isLoading, isAdmin, navigate]);
+  }, [session, isLoading, canAccessAdminDashboard, navigate]); // Add canAccessAdminDashboard to dependencies
 
   if (isLoading) {
     return (

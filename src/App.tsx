@@ -13,7 +13,7 @@ import BorrowRequestsPage from "./pages/BorrowRequestsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Unauthorized from "./pages/Unauthorized";
 import { SessionContextProvider } from "./components/SessionContextProvider";
-import ItemList from "./pages/ItemList"; // Corrected import path
+import ItemList from "./pages/ItemList";
 import ReturnRequestsAdminPage from "./pages/ReturnRequestsAdminPage";
 import BorrowRequestsAdminPage from "./pages/BorrowRequestsAdminPage";
 import UserManagementPage from "./pages/UserManagementPage";
@@ -36,14 +36,14 @@ const App = () => (
             <Route path="/" element={<Index />} />
 
             {/* Protected User Routes */}
-            <Route element={<ProtectedRoute allowedRoles={['Pengguna', 'Admin']} />}>
+            <Route element={<ProtectedRoute allowedRoles={['Pengguna', 'Admin', 'Kepala Sekolah']} />}>
               <Route path="/dashboard" element={<UserDashboard />} />
               <Route path="/consumable-requests" element={<ConsumableRequestsPage />} />
               <Route path="/borrow-requests" element={<BorrowRequestsPage />} />
             </Route>
 
             {/* Protected Admin Routes */}
-            <Route element={<ProtectedRoute allowedRoles={['Admin']} />}>
+            <Route element={<ProtectedRoute allowedRoles={['Admin', 'Kepala Sekolah']} />}>
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
               <Route path="/admin/items" element={<ItemList />} />
               <Route path="/admin/add-item" element={<AddItemForm />} />

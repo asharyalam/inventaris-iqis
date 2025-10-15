@@ -20,6 +20,8 @@ interface SessionContextType {
   userProfile: UserProfile | null;
   isLoading: boolean;
   isAdmin: boolean;
+  isHeadmaster: boolean; // New: Add isHeadmaster
+  canAccessAdminDashboard: boolean; // New: Add canAccessAdminDashboard
 }
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
@@ -81,9 +83,11 @@ export const SessionContextProvider = ({ children }: { children: ReactNode }) =>
   }, [user]);
 
   const isAdmin = userProfile?.role === 'Admin';
+  const isHeadmaster = userProfile?.role === 'Kepala Sekolah'; // New: Calculate isHeadmaster
+  const canAccessAdminDashboard = isAdmin || isHeadmaster; // New: Calculate canAccessAdminDashboard
 
   return (
-    <SessionContext.Provider value={{ session, user, userProfile, isLoading, isAdmin }}>
+    <SessionContext.Provider value={{ session, user, userProfile, isLoading, isAdmin, isHeadmaster, canAccessAdminDashboard }}>
       {children}
     </SessionContext.Provider>
   );
