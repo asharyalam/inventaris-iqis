@@ -64,16 +64,18 @@ const ConsumableRequestList: React.FC = () => {
 
   const getStatusDisplay = (status: string) => {
     switch (status) {
-      case 'Pending': // Keep for backward compatibility if old data exists
+      case 'Pending':
       case 'Menunggu Persetujuan':
         return { text: 'Menunggu Persetujuan', classes: 'bg-yellow-100 text-yellow-800' };
-      case 'Approved by Headmaster': // Old status, will be replaced by 'Disetujui'
+      case 'Approved by Headmaster':
       case 'Disetujui':
         return { text: 'Disetujui', classes: 'bg-blue-100 text-blue-800' };
-      case 'Approved': // Old status, will be replaced by 'Diproses'
+      case 'Approved':
       case 'Diproses':
-        return { text: 'Diproses', classes: 'bg-green-100 text-green-800' };
+      case 'Diserahkan': // Standardized status
+        return { text: 'Diserahkan', classes: 'bg-green-100 text-green-800' };
       case 'Rejected':
+      case 'Ditolak':
         return { text: 'Ditolak', classes: 'bg-red-100 text-red-800' };
       default:
         return { text: status, classes: 'bg-gray-100 text-gray-800' };
@@ -91,7 +93,6 @@ const ConsumableRequestList: React.FC = () => {
               <TableHead>Kuantitas</TableHead>
               <TableHead>Tanggal Permintaan</TableHead>
               <TableHead>Status</TableHead>
-              {/* <TableHead>Catatan Admin</TableHead> -- Removed as requested */}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -107,7 +108,6 @@ const ConsumableRequestList: React.FC = () => {
                       {statusDisplay.text}
                     </span>
                   </TableCell>
-                  {/* <TableCell>{request.admin_notes || '-'}</TableCell> -- Removed as requested */}
                 </TableRow>
               );
             })}

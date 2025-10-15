@@ -35,7 +35,7 @@ const fetchBorrowedItemsForReturn = async (userId: string): Promise<BorrowedItem
       items ( name )
     `)
     .eq('user_id', userId)
-    .eq('status', 'Diproses'); // Only show items that are currently 'Diproses' (borrowed)
+    .eq('status', 'Diserahkan'); // Only show items that are currently 'Diserahkan' (borrowed)
 
   if (error) {
     throw new Error(error.message);
@@ -86,7 +86,7 @@ const ReturnRequestForm: React.FC = () => {
       item_id: selectedBorrowedItem.item_id,
       user_id: user.id,
       quantity: values.quantity,
-      status: 'Pending',
+      status: 'Menunggu Persetujuan', // Standardized status
     });
 
     if (error) {

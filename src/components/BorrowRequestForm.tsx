@@ -92,9 +92,9 @@ const BorrowRequestForm: React.FC = () => {
       item_id: values.item_id,
       user_id: user.id,
       quantity: values.quantity,
-      borrow_start_date: values.borrow_start_date.toISOString(), // Add borrow_start_date
+      borrow_start_date: values.borrow_start_date.toISOString(),
       due_date: values.due_date.toISOString(),
-      status: 'Pending',
+      status: 'Menunggu Persetujuan', // Standardized status
     });
 
     if (error) {

@@ -80,7 +80,7 @@ const ConsumableRequestForm: React.FC = () => {
       item_id: values.item_id,
       user_id: user.id,
       quantity: values.quantity,
-      status: 'Menunggu Persetujuan', // Changed from 'Pending' to 'Menunggu Persetujuan'
+      status: 'Menunggu Persetujuan', // Standardized status
     });
 
     if (error) {

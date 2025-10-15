@@ -60,7 +60,7 @@ const AdminConsumableRequestsPage: React.FC = () => {
     queryFn: fetchAllConsumableRequests,
   });
 
-  const handleAction = async (status: 'Disetujui' | 'Diproses' | 'Ditolak') => { // Updated status options
+  const handleAction = async (status: 'Disetujui' | 'Diserahkan' | 'Ditolak') => { // Standardized status options
     if (!selectedRequest || !user) return;
 
     const { error: updateError } = await supabase
@@ -79,15 +79,15 @@ const AdminConsumableRequestsPage: React.FC = () => {
       let successMessage = "";
       if (status === 'Disetujui') {
         successMessage = "Permintaan barang habis pakai berhasil disetujui!";
-      } else if (status === 'Diproses') {
-        successMessage = "Permintaan barang habis pakai berhasil diproses!";
+      } else if (status === 'Diserahkan') { // Changed from 'Diproses'
+        successMessage = "Permintaan barang habis pakai berhasil diserahkan!";
       } else if (status === 'Ditolak') {
         successMessage = "Permintaan barang habis pakai berhasil ditolak!";
       }
       showSuccess(successMessage);
       
       // If processed by admin, update item quantity
-      if (status === 'Diproses') {
+      if (status === 'Diserahkan') { // Changed from 'Diproses'
         const { data: itemData, error: itemError } = await supabase
           .from('items')
           .select('quantity')
@@ -110,12 +110,12 @@ const AdminConsumableRequestsPage: React.FC = () => {
             queryClient.invalidateQueries({ queryKey: ['items'] });
             queryClient.invalidateQueries({ queryKey: ['inventorySummary'] });
             queryClient.invalidateQueries({ queryKey: ['availableItems'] });
-            queryClient.invalidateQueries({ queryKey: ['allItems'] }); // Invalidate for monitoring page
+            queryClient.invalidateQueries({ queryKey: ['allItems'] });
           }
         }
       }
       queryClient.invalidateQueries({ queryKey: ['consumableRequests', selectedRequest.user_id] });
-      queryClient.invalidateQueries({ queryKey: ['allTransactions'] }); // Invalidate for monitoring page
+      queryClient.invalidateQueries({ queryKey: ['allTransactions'] });
       refetch();
       setIsDialogOpen(false);
       setSelectedRequest(null);
@@ -142,16 +142,18 @@ const AdminConsumableRequestsPage: React.FC = () => {
 
   const getStatusDisplay = (status: string) => {
     switch (status) {
-      case 'Pending': // Keep for backward compatibility if old data exists
+      case 'Pending':
       case 'Menunggu Persetujuan':
         return { text: 'Menunggu Persetujuan', classes: 'bg-yellow-100 text-yellow-800' };
-      case 'Approved by Headmaster': // Old status, will be replaced by 'Disetujui'
+      case 'Approved by Headmaster':
       case 'Disetujui':
         return { text: 'Disetujui', classes: 'bg-blue-100 text-blue-800' };
-      case 'Approved': // Old status, will be replaced by 'Diproses'
+      case 'Approved':
       case 'Diproses':
-        return { text: 'Diproses', classes: 'bg-green-100 text-green-800' };
+      case 'Diserahkan': // Standardized status
+        return { text: 'Diserahkan', classes: 'bg-green-100 text-green-800' };
       case 'Rejected':
+      case 'Ditolak':
         return { text: 'Ditolak', classes: 'bg-red-100 text-red-800' };
       default:
         return { text: status, classes: 'bg-gray-100 text-gray-800' };
@@ -190,7 +192,7 @@ const AdminConsumableRequestsPage: React.FC = () => {
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
-                    {isHeadmaster && request.status === 'Menunggu Persetujuan' && ( // Changed from 'Pending'
+                    {isHeadmaster && request.status === 'Menunggu Persetujuan' && (
                       <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
                         Tinjau
                       </Button>
@@ -200,7 +202,7 @@ const AdminConsumableRequestsPage: React.FC = () => {
                         Proses
                       </Button>
                     )}
-                    {((isHeadmaster && request.status !== 'Menunggu Persetujuan') || (isAdmin && request.status !== 'Disetujui')) && ( // Changed from 'Pending'
+                    {((isHeadmaster && request.status !== 'Menunggu Persetujuan') || (isAdmin && request.status !== 'Disetujui')) && (
                       <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
                         Lihat Detail
                       </Button>
@@ -248,11 +250,11 @@ const AdminConsumableRequestsPage: React.FC = () => {
           )}
           <DialogFooter>
             <Button variant="destructive" onClick={() => handleAction('Ditolak')}>Tolak</Button>
-            {isHeadmaster && selectedRequest?.status === 'Menunggu Persetujuan' && ( // Changed from 'Pending'
+            {isHeadmaster && selectedRequest?.status === 'Menunggu Persetujuan' && (
               <Button onClick={() => handleAction('Disetujui')}>Setujui</Button>
             )}
             {isAdmin && selectedRequest?.status === 'Disetujui' && (
-              <Button onClick={() => handleAction('Diproses')}>Proses</Button>
+              <Button onClick={() => handleAction('Diserahkan')}>Proses</Button>
             )}
           </DialogFooter>
         </DialogContent>

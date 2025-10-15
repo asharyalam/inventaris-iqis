@@ -26,8 +26,8 @@ interface BorrowRequest {
   admin_notes: string | null;
   approved_by: string | null;
   approval_date: string | null;
-  returned_date: string | null; // New field
-  returned_by: string | null;   // New field
+  returned_date: string | null;
+  returned_by: string | null;
   items: { name: string };
   profiles: { first_name: string; last_name: string; instansi: string };
 }
@@ -92,7 +92,7 @@ const BorrowRequestsAdminPage: React.FC = () => {
       newStatus = 'Ditolak';
       successMessage = "Permintaan peminjaman berhasil ditolak!";
     } else if (actionType === 'handover') {
-      newStatus = 'Diproses';
+      newStatus = 'Diserahkan'; // Standardized status
       successMessage = "Barang berhasil diserahkan kepada peminjam!";
       shouldDecrementQuantity = true;
     } else if (actionType === 'return') {
@@ -146,12 +146,12 @@ const BorrowRequestsAdminPage: React.FC = () => {
             queryClient.invalidateQueries({ queryKey: ['items'] });
             queryClient.invalidateQueries({ queryKey: ['inventorySummary'] });
             queryClient.invalidateQueries({ queryKey: ['availableItemsForBorrow'] });
-            queryClient.invalidateQueries({ queryKey: ['allItems'] }); // Invalidate for monitoring page
+            queryClient.invalidateQueries({ queryKey: ['allItems'] });
           }
         }
       }
       queryClient.invalidateQueries({ queryKey: ['borrowRequests', selectedRequest.user_id] });
-      queryClient.invalidateQueries({ queryKey: ['allTransactions'] }); // Invalidate for monitoring page
+      queryClient.invalidateQueries({ queryKey: ['allTransactions'] });
       refetch();
       setIsDialogOpen(false);
       setSelectedRequest(null);
@@ -178,13 +178,14 @@ const BorrowRequestsAdminPage: React.FC = () => {
 
   const getStatusDisplay = (status: string) => {
     switch (status) {
-      case 'Pending': // Keep for backward compatibility if old data exists
+      case 'Pending':
       case 'Menunggu Persetujuan':
         return { text: 'Menunggu Persetujuan', classes: 'bg-yellow-100 text-yellow-800' };
       case 'Disetujui':
         return { text: 'Disetujui', classes: 'bg-blue-100 text-blue-800' };
-      case 'Diproses':
-        return { text: 'Diproses', classes: 'bg-green-100 text-green-800' };
+      case 'Diproses': // Old status, will be replaced by 'Diserahkan'
+      case 'Diserahkan': // Standardized status
+        return { text: 'Diserahkan', classes: 'bg-green-100 text-green-800' };
       case 'Dikembalikan':
         return { text: 'Dikembalikan', classes: 'bg-purple-100 text-purple-800' };
       case 'Ditolak':
@@ -238,12 +239,12 @@ const BorrowRequestsAdminPage: React.FC = () => {
                         Proses
                       </Button>
                     )}
-                    {isAdmin && request.status === 'Diproses' && (
+                    {isAdmin && request.status === 'Diserahkan' && ( // Changed from 'Diproses'
                       <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
                         Proses Pengembalian
                       </Button>
                     )}
-                    {((isHeadmaster && request.status !== 'Menunggu Persetujuan') || (isAdmin && request.status !== 'Disetujui' && request.status !== 'Diproses')) && (
+                    {((isHeadmaster && request.status !== 'Menunggu Persetujuan') || (isAdmin && request.status !== 'Disetujui' && request.status !== 'Diserahkan')) && ( // Changed from 'Diproses'
                       <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
                         Lihat Detail
                       </Button>
@@ -299,7 +300,7 @@ const BorrowRequestsAdminPage: React.FC = () => {
                   onChange={(e) => setAdminNotes(e.target.value)}
                   className="col-span-3"
                   placeholder="Tambahkan catatan admin..."
-                  readOnly={selectedRequest.status !== 'Menunggu Persetujuan' && selectedRequest.status !== 'Disetujui' && selectedRequest.status !== 'Diproses'}
+                  readOnly={selectedRequest.status !== 'Menunggu Persetujuan' && selectedRequest.status !== 'Disetujui' && selectedRequest.status !== 'Diserahkan'} // Changed from 'Diproses'
                 />
               </div>
             </div>
@@ -317,7 +318,7 @@ const BorrowRequestsAdminPage: React.FC = () => {
                 <Button onClick={() => handleAction('handover')}>Proses</Button>
               </>
             )}
-            {isAdmin && selectedRequest?.status === 'Diproses' && (
+            {isAdmin && selectedRequest?.status === 'Diserahkan' && ( // Changed from 'Diproses'
               <>
                 <Button variant="destructive" onClick={() => handleAction('reject')}>Tolak</Button>
                 <Button onClick={() => handleAction('return')}>Proses Pengembalian</Button>

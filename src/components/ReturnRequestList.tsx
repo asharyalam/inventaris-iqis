@@ -64,7 +64,7 @@ const ReturnRequestList: React.FC = () => {
 
   const getStatusDisplay = (status: string) => {
     switch (status) {
-      case 'Pending': // Keep for backward compatibility if old data exists
+      case 'Pending':
       case 'Menunggu Persetujuan':
         return { text: 'Menunggu Persetujuan', classes: 'bg-yellow-100 text-yellow-800' };
       case 'Disetujui':

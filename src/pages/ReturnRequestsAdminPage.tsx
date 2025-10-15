@@ -60,13 +60,13 @@ const ReturnRequestsAdminPage: React.FC = () => {
     queryFn: fetchAllReturnRequests,
   });
 
-  const handleAction = async (status: 'Approved' | 'Rejected') => {
+  const handleAction = async (status: 'Disetujui' | 'Ditolak') => { // Standardized status options
     if (!selectedRequest || !user) return;
 
     const { error: updateError } = await supabase
       .from('return_requests')
       .update({
-        status: status === 'Approved' ? 'Disetujui' : 'Ditolak', // Update status to Indonesian
+        status: status,
         admin_notes: adminNotes,
         approved_by: user.id,
         approval_date: new Date().toISOString(),
@@ -76,9 +76,9 @@ const ReturnRequestsAdminPage: React.FC = () => {
     if (updateError) {
       showError(`Gagal memperbarui permintaan: ${updateError.message}`);
     } else {
-      showSuccess(`Permintaan pengembalian berhasil ${status === 'Approved' ? 'disetujui' : 'ditolak'}!`);
+      showSuccess(`Permintaan pengembalian berhasil ${status === 'Disetujui' ? 'disetujui' : 'ditolak'}!`);
       // If approved, update item quantity
-      if (status === 'Approved') {
+      if (status === 'Disetujui') {
         const { data: itemData, error: itemError } = await supabase
           .from('items')
           .select('quantity')
@@ -100,13 +100,13 @@ const ReturnRequestsAdminPage: React.FC = () => {
             showSuccess("Kuantitas barang berhasil diperbarui.");
             queryClient.invalidateQueries({ queryKey: ['items'] });
             queryClient.invalidateQueries({ queryKey: ['inventorySummary'] });
-            queryClient.invalidateQueries({ queryKey: ['availableItemsForBorrow'] }); // Invalidate for borrow form
-            queryClient.invalidateQueries({ queryKey: ['allItems'] }); // Invalidate for monitoring page
+            queryClient.invalidateQueries({ queryKey: ['availableItemsForBorrow'] });
+            queryClient.invalidateQueries({ queryKey: ['allItems'] });
           }
         }
       }
       queryClient.invalidateQueries({ queryKey: ['returnRequests', selectedRequest.user_id] });
-      queryClient.invalidateQueries({ queryKey: ['allTransactions'] }); // Invalidate for monitoring page
+      queryClient.invalidateQueries({ queryKey: ['allTransactions'] });
       refetch();
       setIsDialogOpen(false);
       setSelectedRequest(null);
@@ -130,7 +130,7 @@ const ReturnRequestsAdminPage: React.FC = () => {
 
   const getStatusDisplay = (status: string) => {
     switch (status) {
-      case 'Pending': // Keep for backward compatibility if old data exists
+      case 'Pending':
       case 'Menunggu Persetujuan':
         return { text: 'Menunggu Persetujuan', classes: 'bg-yellow-100 text-yellow-800' };
       case 'Disetujui':
@@ -221,8 +221,8 @@ const ReturnRequestsAdminPage: React.FC = () => {
             </div>
           )}
           <DialogFooter>
-            <Button variant="destructive" onClick={() => handleAction('Rejected')}>Tolak</Button>
-            <Button onClick={() => handleAction('Approved')}>Setujui</Button>
+            <Button variant="destructive" onClick={() => handleAction('Ditolak')}>Tolak</Button>
+            <Button onClick={() => handleAction('Disetujui')}>Setujui</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } => '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,9 +18,9 @@ interface Request {
   type: 'Peminjaman' | 'Pengembalian' | 'Habis Pakai';
   items: { name: string };
   profiles: { first_name: string; last_name: string; instansi: string };
-  due_date?: string; // Only for borrow requests
-  borrow_start_date?: string; // Add borrow_start_date for borrow requests
-  returned_date?: string; // New field for borrow requests
+  due_date?: string;
+  borrow_start_date?: string;
+  returned_date?: string;
 }
 
 interface Item {
@@ -126,15 +126,18 @@ const MonitoringReportingPage: React.FC = () => {
 
   const getStatusDisplay = (status: string) => {
     switch (status) {
-      case 'Pending': // Keep for backward compatibility if old data exists
+      case 'Pending':
       case 'Menunggu Persetujuan':
         return { text: 'Menunggu Persetujuan', classes: 'bg-yellow-100 text-yellow-800' };
       case 'Disetujui':
         return { text: 'Disetujui', classes: 'bg-blue-100 text-blue-800' };
-      case 'Diproses':
-        return { text: 'Diproses', classes: 'bg-green-100 text-green-800' };
-      case 'Dikembalikan': // New status
+      case 'Approved': // Old status, will be replaced by 'Diserahkan'
+      case 'Diproses': // Old status, will be replaced by 'Diserahkan'
+      case 'Diserahkan':
+        return { text: 'Diserahkan', classes: 'bg-green-100 text-green-800' };
+      case 'Dikembalikan':
         return { text: 'Dikembalikan', classes: 'bg-purple-100 text-purple-800' };
+      case 'Rejected':
       case 'Ditolak':
         return { text: 'Ditolak', classes: 'bg-red-100 text-red-800' };
       default:
@@ -192,7 +195,7 @@ const MonitoringReportingPage: React.FC = () => {
                   <TableHead>Kuantitas</TableHead>
                   <TableHead>Tgl Peminjaman</TableHead>
                   <TableHead>Tgl Jatuh Tempo</TableHead>
-                  <TableHead>Tgl Dikembalikan</TableHead> {/* New TableHead */}
+                  <TableHead>Tgl Dikembalikan</TableHead>
                   <TableHead>Status</TableHead>
                 </TableRow>
               </TableHeader>
@@ -220,7 +223,7 @@ const MonitoringReportingPage: React.FC = () => {
                         {transaction.type === 'Peminjaman' && transaction.returned_date
                           ? format(new Date(transaction.returned_date), 'dd MMM yyyy', { locale: id })
                           : '-'}
-                      </TableCell> {/* New TableCell */}
+                      </TableCell>
                       <TableCell>
                         <span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusDisplay.classes}`}>
                           {statusDisplay.text}
