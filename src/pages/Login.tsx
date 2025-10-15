@@ -45,7 +45,7 @@ const Login = () => {
                   brandAccent: 'hsl(217.2 91.2% 59.8%)', // accent color
                 },
               },
-            }}
+            },
           }}
           theme="light"
           redirectTo={window.location.origin} // Redirect to current origin after auth
