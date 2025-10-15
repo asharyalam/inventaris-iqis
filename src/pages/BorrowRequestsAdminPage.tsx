@@ -51,7 +51,7 @@ const fetchAllBorrowRequests = async (): Promise<BorrowRequest[]> => {
 
 const BorrowRequestsAdminPage: React.FC = () => {
   const queryClient = useQueryClient();
-  const { user } = useSession();
+  const { user, userProfile } = useSession();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<BorrowRequest | null>(null);
   const [adminNotes, setAdminNotes] = useState('');
@@ -61,7 +61,7 @@ const BorrowRequestsAdminPage: React.FC = () => {
     queryFn: fetchAllBorrowRequests,
   });
 
-  const handleAction = async (status: 'Approved' | 'Rejected') => {
+  const handleAction = async (status: 'Approved by Headmaster' | 'Approved' | 'Rejected') => {
     if (!selectedRequest || !user) return;
 
     const { error: updateError } = await supabase
@@ -77,8 +77,8 @@ const BorrowRequestsAdminPage: React.FC = () => {
     if (updateError) {
       showError(`Gagal memperbarui permintaan: ${updateError.message}`);
     } else {
-      showSuccess(`Permintaan peminjaman berhasil ${status === 'Approved' ? 'disetujui' : 'ditolak'}!`);
-      // If approved, update item quantity
+      showSuccess(`Permintaan peminjaman berhasil ${status === 'Approved by Headmaster' ? 'disetujui oleh Kepala Sekolah' : status === 'Approved' ? 'diproses' : 'ditolak'}!`);
+      // If approved by admin, update item quantity
       if (status === 'Approved') {
         const { data: itemData, error: itemError } = await supabase
           .from('items')
@@ -126,6 +126,9 @@ const BorrowRequestsAdminPage: React.FC = () => {
     return <div className="text-center text-red-500">Error: {error.message}</div>;
   }
 
+  const isHeadmaster = userProfile?.role === 'Kepala Sekolah';
+  const isAdmin = userProfile?.role === 'Admin';
+
   return (
     <div className="w-full max-w-6xl mx-auto p-4">
       <h2 className="text-3xl font-bold mb-6 text-center">Manajemen Permintaan Peminjaman</h2>
@@ -155,6 +158,7 @@ const BorrowRequestsAdminPage: React.FC = () => {
                 <TableCell>
                   <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
                     request.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                    request.status === 'Approved by Headmaster' ? 'bg-blue-100 text-blue-800' :
                     request.status === 'Approved' ? 'bg-green-100 text-green-800' :
                     'bg-red-100 text-red-800'
                   }`}>
@@ -162,9 +166,14 @@ const BorrowRequestsAdminPage: React.FC = () => {
                   </span>
                 </TableCell>
                 <TableCell className="text-right">
-                  {request.status === 'Pending' && (
+                  {isHeadmaster && request.status === 'Pending' && (
                     <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
-                      Tinjau
+                      Tinjau (Kepala Sekolah)
+                    </Button>
+                  )}
+                  {isAdmin && request.status === 'Approved by Headmaster' && (
+                    <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
+                      Proses (Admin)
                     </Button>
                   )}
                 </TableCell>
@@ -213,7 +222,12 @@ const BorrowRequestsAdminPage: React.FC = () => {
           )}
           <DialogFooter>
             <Button variant="destructive" onClick={() => handleAction('Rejected')}>Tolak</Button>
-            <Button onClick={() => handleAction('Approved')}>Setujui</Button>
+            {isHeadmaster && selectedRequest?.status === 'Pending' && (
+              <Button onClick={() => handleAction('Approved by Headmaster')}>Setujui (Kepala Sekolah)</Button>
+            )}
+            {isAdmin && selectedRequest?.status === 'Approved by Headmaster' && (
+              <Button onClick={() => handleAction('Approved')}>Proses (Admin)</Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
