@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Dashboard from "./Dashboard";
 import AdminDashboard from "./AdminDashboard";
+import MainLayout from "@/components/MainLayout"; // Import MainLayout
 
 interface UserProfile {
   first_name: string;
@@ -48,17 +49,23 @@ const Index = () => {
   }
 
   if (!session || !profile) {
-    // If session or profile is not available after loading, redirect to login
     navigate('/login');
     return null;
   }
 
-  // Render dashboard based on user role
-  if (profile.role === 'Admin') {
-    return <AdminDashboard firstName={profile.first_name || user.email || ''} instansi={profile.instansi || 'N/A'} role={profile.role} />;
-  } else {
-    return <Dashboard firstName={profile.first_name || user.email || ''} instansi={profile.instansi || 'N/A'} role={profile.role} />;
-  }
+  const userFirstName = profile.first_name || user.email || '';
+  const userInstansi = profile.instansi || 'N/A';
+  const userRole = profile.role || 'Pengguna';
+
+  return (
+    <MainLayout firstName={userFirstName} instansi={userInstansi} role={userRole}>
+      {profile.role === 'Admin' ? (
+        <AdminDashboard />
+      ) : (
+        <Dashboard />
+      )}
+    </MainLayout>
+  );
 };
 
 export default Index;
