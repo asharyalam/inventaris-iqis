@@ -232,7 +232,7 @@ const BorrowRequestsAdminPage: React.FC = () => {
                     )}
                     {isAdmin && request.status === 'Disetujui' && (
                       <Button variant="outline" size="sm" onClick={() => handleAction('handover')}>
-                        Serahkan
+                        Proses
                       </Button>
                     )}
                     {isAdmin && request.status === 'Diproses' && ( // New button for Admin to process return
@@ -311,7 +311,7 @@ const BorrowRequestsAdminPage: React.FC = () => {
             {isAdmin && selectedRequest?.status === 'Disetujui' && (
               <>
                 <Button variant="destructive" onClick={() => handleAction('reject')}>Tolak</Button>
-                <Button onClick={() => handleAction('handover')}>Serahkan</Button>
+                <Button onClick={() => handleAction('handover')}>Proses</Button>
               </>
             )}
             {isAdmin && selectedRequest?.status === 'Diproses' && (
