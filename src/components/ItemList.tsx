@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { useSession } from './SessionContextProvider';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import EditItemForm from './EditItemForm';
 import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationLink, PaginationNext, PaginationEllipsis } from "@/components/ui/pagination";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // Import Select components
 
 interface Item {
   id: string;
@@ -26,7 +27,9 @@ interface PaginatedItems {
   totalCount: number;
 }
 
-const fetchItems = async (searchTerm: string = '', page: number, pageSize: number): Promise<PaginatedItems> => {
+type ItemTypeFilter = 'all' | 'consumable' | 'returnable';
+
+const fetchItems = async (searchTerm: string = '', page: number, pageSize: number, typeFilter: ItemTypeFilter): Promise<PaginatedItems> => {
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
@@ -34,6 +37,10 @@ const fetchItems = async (searchTerm: string = '', page: number, pageSize: numbe
 
   if (searchTerm) {
     query = query.ilike('name', `%${searchTerm}%`);
+  }
+
+  if (typeFilter !== 'all') {
+    query = query.eq('type', typeFilter);
   }
 
   const { data, error, count } = await query
@@ -48,13 +55,15 @@ const fetchItems = async (searchTerm: string = '', page: number, pageSize: numbe
 };
 
 const ItemList: React.FC = () => {
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [typeFilter, setTypeFilter] = useState<ItemTypeFilter>('all'); // New state for type filter
   const itemsPerPage = 10;
 
   const { data, isLoading, error, refetch } = useQuery<PaginatedItems, Error>({
-    queryKey: ['items', searchTerm, currentPage, itemsPerPage],
-    queryFn: () => fetchItems(searchTerm, currentPage, itemsPerPage),
+    queryKey: ['items', searchTerm, currentPage, itemsPerPage, typeFilter], // Add typeFilter to queryKey
+    queryFn: () => fetchItems(searchTerm, currentPage, itemsPerPage, typeFilter),
   });
 
   const items = data?.items || [];
@@ -79,6 +88,7 @@ const ItemList: React.FC = () => {
       // Invalidate inventory summary as well
       queryClient.invalidateQueries({ queryKey: ['inventorySummary'] });
       queryClient.invalidateQueries({ queryKey: ['availableItems'] });
+      queryClient.invalidateQueries({ queryKey: ['availableItemsForBorrow'] }); // Invalidate for borrow form
     }
   };
 
@@ -99,6 +109,11 @@ const ItemList: React.FC = () => {
     }
   };
 
+  const handleTypeFilterChange = (value: ItemTypeFilter) => {
+    setTypeFilter(value);
+    setCurrentPage(1); // Reset to first page when filter changes
+  };
+
   if (isLoading) {
     return <div className="text-center">Memuat daftar barang...</div>;
   }
@@ -110,7 +125,7 @@ const ItemList: React.FC = () => {
   return (
     <div className="w-full max-w-4xl mx-auto">
       <h3 className="text-2xl font-semibold mb-4">Daftar Barang</h3>
-      <div className="mb-4">
+      <div className="flex flex-col sm:flex-row gap-4 mb-4">
         <Input
           type="text"
           placeholder="Cari barang berdasarkan nama..."
@@ -119,8 +134,18 @@ const ItemList: React.FC = () => {
             setSearchTerm(e.target.value);
             setCurrentPage(1);
           }}
-          className="w-full"
+          className="flex-1"
         />
+        <Select onValueChange={handleTypeFilterChange} defaultValue={typeFilter}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Filter Tipe" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Semua Tipe</SelectItem>
+            <SelectItem value="returnable">Harus Dikembalikan</SelectItem>
+            <SelectItem value="consumable">Habis Pakai</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       {items && items.length > 0 ? (
         <>
@@ -130,7 +155,7 @@ const ItemList: React.FC = () => {
                 <TableHead>Nama</TableHead>
                 <TableHead>Deskripsi</TableHead>
                 <TableHead>Kuantitas</TableHead>
-                <TableHead>Tipe</TableHead> {/* New TableHead for Type */}
+                <TableHead>Tipe</TableHead>
                 {isAdmin && <TableHead className="text-right">Aksi</TableHead>}
               </TableRow>
             </TableHeader>
@@ -140,7 +165,7 @@ const ItemList: React.FC = () => {
                   <TableCell className="font-medium">{item.name}</TableCell>
                   <TableCell>{item.description || '-'}</TableCell>
                   <TableCell>{item.quantity}</TableCell>
-                  <TableCell>{item.type === 'consumable' ? 'Habis Pakai' : 'Harus Dikembalikan'}</TableCell> {/* Display item type */}
+                  <TableCell>{item.type === 'consumable' ? 'Habis Pakai' : 'Harus Dikembalikan'}</TableCell>
                   {isAdmin && (
                     <TableCell className="text-right space-x-2">
                       <Button variant="outline" size="sm" onClick={() => handleEditClick(item)}>
@@ -179,7 +204,7 @@ const ItemList: React.FC = () => {
           )}
         </>
       ) : (
-        <p className="text-center text-gray-500">Belum ada barang yang ditambahkan atau tidak ditemukan.</p>
+        <p className="text-center text-gray-500">Tidak ada barang yang ditemukan.</p>
       )}
 
       {editingItem && (
