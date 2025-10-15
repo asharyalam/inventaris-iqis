@@ -10,18 +10,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SignUpForm from '@/components/SignUpForm'; // Import the new sign-up form
 
 const Login = () => {
-  const { session, isLoading, isAdmin } = useSession();
+  const { session, isLoading, canAccessAdminDashboard } = useSession(); // Menggunakan canAccessAdminDashboard
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!isLoading && session) {
-      if (isAdmin) {
+      if (canAccessAdminDashboard) { // Mengarahkan Admin dan Kepala Sekolah ke /admin/dashboard
         navigate('/admin/dashboard', { replace: true });
       } else {
         navigate('/dashboard', { replace: true });
       }
     }
-  }, [session, isLoading, isAdmin, navigate]);
+  }, [session, isLoading, canAccessAdminDashboard, navigate]); // Menambahkan canAccessAdminDashboard ke dependencies
 
   if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center">Memuat...</div>;
@@ -51,7 +51,7 @@ const Login = () => {
                       brandAccent: 'hsl(217.2 91.2% 59.8%)', // accent color
                     },
                   },
-                }, // Kurung kurawal ekstra telah dihapus di sini
+                },
               }}
               theme="light"
               redirectTo={window.location.origin} // Redirect to current origin after auth

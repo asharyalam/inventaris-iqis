@@ -26,9 +26,9 @@ const navItems: NavItem[] = [
   { title: "Permintaan Peminjaman", href: "/borrow-requests", icon: Handshake, roles: ["Pengguna"] },
   { title: "Manajemen Barang", href: "/admin/items", icon: Package, roles: ["Admin"] },
   { title: "Tambah Barang Baru", href: "/admin/add-item", icon: PlusCircle, roles: ["Admin"] },
-  { title: "Manajemen Persetujuan Peminjaman", href: "/admin/borrow-requests", icon: Handshake, roles: ["Admin", "Kepala Sekolah"] }, // Diperbarui: Judul dan peran
-  { title: "Manajemen Persetujuan Pengembalian", href: "/admin/return-requests", icon: History, roles: ["Admin", "Kepala Sekolah"] }, // Diperbarui: Judul dan peran
-  { title: "Manajemen Persetujuan Habis Pakai", href: "/admin/consumable-requests", icon: Package, roles: ["Admin", "Kepala Sekolah"] }, // Diperbarui: Judul dan peran
+  { title: "Manajemen Persetujuan Peminjaman", href: "/admin/borrow-requests", icon: Handshake, roles: ["Admin", "Kepala Sekolah"] },
+  { title: "Manajemen Persetujuan Pengembalian", href: "/admin/return-requests", icon: History, roles: ["Admin"] }, // Diperbarui: Dihapus 'Kepala Sekolah'
+  { title: "Manajemen Persetujuan Habis Pakai", href: "/admin/consumable-requests", icon: Package, roles: ["Admin", "Kepala Sekolah"] },
   { title: "Manajemen Pengguna", href: "/admin/users", icon: Users, roles: ["Admin"] },
   { title: "Pemantauan & Pelaporan", href: "/admin/monitoring-reporting", icon: BarChart3, roles: ["Admin", "Kepala Sekolah"] },
 ];
