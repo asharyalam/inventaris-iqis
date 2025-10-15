@@ -6,6 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // Import Select components
+
+const instansiOptions = ["BPH", "TKIT", "SDIT", "SMPIT", "SMKIT", "BK"]; // Define instansi options
 
 const ProfilePage: React.FC = () => {
   const { user, userProfile, isLoading } = useSession();
@@ -46,7 +49,18 @@ const ProfilePage: React.FC = () => {
             </div>
             <div className="space-y-2">
               <Label htmlFor="instansi">Instansi</Label>
-              <Input id="instansi" value={userProfile?.instansi || ''} readOnly />
+              <Select value={userProfile?.instansi || ''} disabled> {/* Changed to Select */}
+                <SelectTrigger id="instansi" className="w-full">
+                  <SelectValue placeholder="Pilih Instansi" />
+                </SelectTrigger>
+                <SelectContent>
+                  {instansiOptions.map((instansi) => (
+                    <SelectItem key={instansi} value={instansi}>
+                      {instansi}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="role">Peran</Label>
