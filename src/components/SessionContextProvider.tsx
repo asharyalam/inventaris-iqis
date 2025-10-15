@@ -20,8 +20,8 @@ interface SessionContextType {
   userProfile: UserProfile | null;
   isLoading: boolean;
   isAdmin: boolean;
-  isHeadmaster: boolean; // New: Add isHeadmaster
-  canAccessAdminDashboard: boolean; // New: Add canAccessAdminDashboard
+  isHeadmaster: boolean;
+  canAccessAdminDashboard: boolean;
 }
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
@@ -30,27 +30,27 @@ export const SessionContextProvider = ({ children }: { children: ReactNode }) =>
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true); // Initialize as true
 
   useEffect(() => {
-    const getSession = async () => {
-      setIsLoading(true);
+    const setupAuth = async () => {
+      setIsLoading(true); // Ensure loading is true at the start of auth setup
       const { data: { session }, error } = await supabase.auth.getSession();
       if (error) {
         showError(`Error getting session: ${error.message}`);
       }
       setSession(session);
       setUser(session?.user || null);
-      setIsLoading(false);
+      // Profile fetching will be handled by the next useEffect, which will then set isLoading to false
     };
 
-    getSession();
+    setupAuth();
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         setSession(session);
         setUser(session?.user || null);
-        setIsLoading(false);
+        // isLoading will be managed by the profile fetching useEffect
       }
     );
 
@@ -60,7 +60,7 @@ export const SessionContextProvider = ({ children }: { children: ReactNode }) =>
   }, []);
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchProfileAndSetLoading = async () => {
       if (user) {
         const { data, error } = await supabase
           .from('profiles')
@@ -75,16 +75,27 @@ export const SessionContextProvider = ({ children }: { children: ReactNode }) =>
           setUserProfile(data);
         }
       } else {
-        setUserProfile(null);
+        setUserProfile(null); // No user, no profile
       }
+      setIsLoading(false); // Set loading to false once profile (or lack thereof) is determined
     };
 
-    fetchProfile();
-  }, [user]);
+    // Only fetch profile if user state has been determined (not initial undefined)
+    // and only if user is not null (i.e., authenticated)
+    if (user !== undefined) {
+      if (user) {
+        fetchProfileAndSetLoading();
+      } else {
+        // If user is null (unauthenticated), we are done loading
+        setUserProfile(null);
+        setIsLoading(false);
+      }
+    }
+  }, [user]); // Depend on user state
 
   const isAdmin = userProfile?.role === 'Admin';
-  const isHeadmaster = userProfile?.role === 'Kepala Sekolah'; // New: Calculate isHeadmaster
-  const canAccessAdminDashboard = isAdmin || isHeadmaster; // New: Calculate canAccessAdminDashboard
+  const isHeadmaster = userProfile?.role === 'Kepala Sekolah';
+  const canAccessAdminDashboard = isAdmin || isHeadmaster;
 
   return (
     <SessionContext.Provider value={{ session, user, userProfile, isLoading, isAdmin, isHeadmaster, canAccessAdminDashboard }}>
