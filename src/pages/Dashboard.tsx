@@ -4,8 +4,9 @@ import React from 'react';
 import ItemList from '@/components/ItemList';
 import RequestReturnForm from '@/components/RequestReturnForm';
 import UserReturnRequests from '@/components/UserReturnRequests';
-import RequestBorrowForm from '@/components/RequestBorrowForm'; // Import RequestBorrowForm
-import UserBorrowRequests from '@/components/UserBorrowRequests'; // Import UserBorrowRequests
+import RequestBorrowForm from '@/components/RequestBorrowForm';
+import UserBorrowRequests from '@/components/UserBorrowRequests';
+import UserBorrowedItems from '@/components/UserBorrowedItems'; // Import UserBorrowedItems
 
 const Dashboard: React.FC = () => {
   return (
@@ -16,8 +17,9 @@ const Dashboard: React.FC = () => {
           Ini adalah halaman dashboard Anda. Anda dapat melihat daftar barang yang tersedia, mengajukan peminjaman, dan pengembalian.
         </p>
       </div>
-      <RequestBorrowForm /> {/* Tambahkan formulir peminjaman */}
-      <UserBorrowRequests /> {/* Tambahkan daftar permintaan peminjaman pengguna */}
+      <RequestBorrowForm />
+      <UserBorrowedItems /> {/* Add UserBorrowedItems here */}
+      <UserBorrowRequests />
       <RequestReturnForm />
       <UserReturnRequests />
       <ItemList />
