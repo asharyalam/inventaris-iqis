@@ -8,6 +8,7 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login"; // Import Login page
 import { SessionContextProvider } from "./components/SessionContextProvider"; // Import SessionContextProvider
 import ProtectedRoute from "./components/ProtectedRoute"; // Import ProtectedRoute
+import UserManagement from "./pages/UserManagement"; // Import UserManagement
 
 const queryClient = new QueryClient();
 
@@ -22,6 +23,7 @@ const App = () => (
             <Route path="/login" element={<Login />} /> {/* Add Login route */}
             <Route element={<ProtectedRoute />}> {/* Protect main routes */}
               <Route path="/" element={<Index />} />
+              <Route path="/admin/users" element={<UserManagement />} /> {/* Add User Management route */}
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             </Route>
             <Route path="*" element={<NotFound />} />
