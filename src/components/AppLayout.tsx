@@ -49,7 +49,7 @@ const SidebarContent: React.FC<{ userRole: string | null; closeSheet?: () => voi
           const isActive = location.pathname === item.href;
           return (
             <Link
-              key={item.href} {/* Diperbarui: Menggunakan item.href sebagai kunci */}
+              key={item.href}
               to={item.href}
               onClick={closeSheet}
               className={cn(
