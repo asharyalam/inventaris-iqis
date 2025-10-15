@@ -3,6 +3,7 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useSession } from './SessionContextProvider';
+import Layout from './Layout'; // Import the new Layout component
 
 interface ProtectedRouteProps {
   allowedRoles?: string[];
@@ -23,7 +24,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles }) => {
     return <Navigate to="/unauthorized" replace />; // Redirect to an unauthorized page
   }
 
-  return <Outlet />;
+  // Render the Layout component which includes the Header and then the Outlet
+  return <Layout />;
 };
 
 export default ProtectedRoute;
