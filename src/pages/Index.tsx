@@ -59,7 +59,8 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
       <div className="text-center bg-white p-8 rounded-lg shadow-md">
-        <h1 className="text-4xl font-bold mb-4">Selamat Datang, {profile?.first_name || user?.email}!</h1>
+        <h1 className="text-5xl font-extrabold text-gray-900 mb-6">Aplikasi Manajemen Sekolah</h1> {/* Judul Aplikasi */}
+        <h2 className="text-4xl font-bold mb-4">Selamat Datang, {profile?.first_name || user?.email}!</h2>
         {profile && (
           <div className="mb-4 text-lg text-gray-700">
             <p><strong>Instansi:</strong> {profile.instansi}</p>
