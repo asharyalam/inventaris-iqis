@@ -128,7 +128,7 @@ const ReturnRequestsAdminPage: React.FC = () => {
   const getStatusDisplay = (status: string) => {
     switch (status) {
       case 'Pending':
-        return { text: 'Pending', classes: 'bg-yellow-100 text-yellow-800' };
+        return { text: 'Menunggu Persetujuan', classes: 'bg-yellow-100 text-yellow-800' };
       case 'Disetujui':
         return { text: 'Disetujui', classes: 'bg-green-100 text-green-800' };
       case 'Ditolak':

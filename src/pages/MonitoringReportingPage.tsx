@@ -127,7 +127,7 @@ const MonitoringReportingPage: React.FC = () => {
   const getStatusDisplay = (status: string) => {
     switch (status) {
       case 'Pending':
-        return { text: 'Pending', classes: 'bg-yellow-100 text-yellow-800' };
+        return { text: 'Menunggu Persetujuan', classes: 'bg-yellow-100 text-yellow-800' };
       case 'Disetujui':
         return { text: 'Disetujui', classes: 'bg-blue-100 text-blue-800' };
       case 'Diproses':
