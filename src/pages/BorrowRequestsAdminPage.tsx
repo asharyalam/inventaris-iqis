@@ -21,6 +21,7 @@ interface BorrowRequest {
   quantity: number;
   request_date: string;
   due_date: string;
+  borrow_start_date: string; // Add borrow_start_date
   status: string;
   admin_notes: string | null;
   items: { name: string };
@@ -37,6 +38,7 @@ const fetchAllBorrowRequests = async (): Promise<BorrowRequest[]> => {
       quantity,
       request_date,
       due_date,
+      borrow_start_date,
       status,
       admin_notes,
       items ( name ),
@@ -62,17 +64,26 @@ const BorrowRequestsAdminPage: React.FC = () => {
     queryFn: fetchAllBorrowRequests,
   });
 
-  const handleAction = async (status: 'Approved by Headmaster' | 'Approved' | 'Rejected') => {
+  const handleAction = async (status: 'Approved by Headmaster' | 'Approved' | 'Rejected' | 'Diserahkan') => {
     if (!selectedRequest || !user) return;
+
+    const updatePayload: { status: string; admin_notes: string; approved_by: string; approval_date: string; borrow_start_date?: string } = {
+      status: status,
+      admin_notes: adminNotes,
+      approved_by: user.id,
+      approval_date: new Date().toISOString(),
+    };
+
+    // If status is 'Diserahkan', set borrow_start_date to current date if not already set
+    if (status === 'Diserahkan') {
+      updatePayload.status = 'Diproses'; // Change status to Diproses after handover
+      // The borrow_start_date is already set by the user in the form.
+      // This action just confirms the handover.
+    }
 
     const { error: updateError } = await supabase
       .from('borrow_requests')
-      .update({
-        status: status,
-        admin_notes: adminNotes,
-        approved_by: user.id,
-        approval_date: new Date().toISOString(),
-      })
+      .update(updatePayload)
       .eq('id', selectedRequest.id);
 
     if (updateError) {
@@ -85,11 +96,13 @@ const BorrowRequestsAdminPage: React.FC = () => {
         successMessage = "Permintaan peminjaman berhasil diproses!";
       } else if (status === 'Rejected') {
         successMessage = "Permintaan peminjaman berhasil ditolak!";
+      } else if (status === 'Diserahkan') {
+        successMessage = "Barang berhasil diserahkan kepada peminjam!";
       }
       showSuccess(successMessage);
       
       // If approved by admin, update item quantity
-      if (status === 'Approved') {
+      if (status === 'Approved') { // This logic should now be for 'Diserahkan'
         const { data: itemData, error: itemError } = await supabase
           .from('items')
           .select('quantity')
@@ -150,6 +163,8 @@ const BorrowRequestsAdminPage: React.FC = () => {
         return { text: 'Diproses', classes: 'bg-green-100 text-green-800' };
       case 'Rejected':
         return { text: 'Ditolak', classes: 'bg-red-100 text-red-800' };
+      case 'Diserahkan': // New status
+        return { text: 'Diserahkan', classes: 'bg-purple-100 text-purple-800' };
       default:
         return { text: status, classes: 'bg-gray-100 text-gray-800' };
     }
@@ -166,8 +181,8 @@ const BorrowRequestsAdminPage: React.FC = () => {
               <TableHead>Peminjam</TableHead>
               <TableHead>Instansi</TableHead>
               <TableHead>Kuantitas</TableHead>
-              <TableHead>Tanggal Permintaan</TableHead>
-              <TableHead>Tanggal Jatuh Tempo</TableHead>
+              <TableHead>Tgl Peminjaman</TableHead> {/* New column */}
+              <TableHead>Tgl Jatuh Tempo</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Aksi</TableHead>
             </TableRow>
@@ -181,17 +196,22 @@ const BorrowRequestsAdminPage: React.FC = () => {
                   <TableCell>{`${request.profiles?.first_name || ''} ${request.profiles?.last_name || ''}`.trim() || 'N/A'}</TableCell>
                   <TableCell>{request.profiles?.instansi || '-'}</TableCell>
                   <TableCell>{request.quantity}</TableCell>
-                  <TableCell>{format(new Date(request.request_date), 'dd MMM yyyy HH:mm', { locale: id })}</TableCell>
+                  <TableCell>{format(new Date(request.borrow_start_date), 'dd MMM yyyy', { locale: id })}</TableCell> {/* Display borrow_start_date */}
                   <TableCell>{format(new Date(request.due_date), 'dd MMM yyyy', { locale: id })}</TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusDisplay.classes}`}>
                       {statusDisplay.text}
                     </span>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right space-x-2">
                     {isHeadmaster && request.status === 'Pending' && (
                       <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
                         Tinjau
+                      </Button>
+                    )}
+                    {isAdmin && request.status === 'Approved by Headmaster' && (
+                      <Button variant="outline" size="sm" onClick={() => handleAction('Diserahkan')}> {/* New button for Admin */}
+                        Serahkan Barang
                       </Button>
                     )}
                     {isAdmin && request.status === 'Approved by Headmaster' && (
@@ -227,6 +247,10 @@ const BorrowRequestsAdminPage: React.FC = () => {
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="quantity" className="text-right">Kuantitas</Label>
                 <Input id="quantity" value={selectedRequest.quantity} className="col-span-3" readOnly />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="borrowStartDate" className="text-right">Tanggal Peminjaman</Label> {/* New field */}
+                <Input id="borrowStartDate" value={format(new Date(selectedRequest.borrow_start_date), 'dd MMM yyyy', { locale: id })} className="col-span-3" readOnly />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="dueDate" className="text-right">Tanggal Jatuh Tempo</Label>

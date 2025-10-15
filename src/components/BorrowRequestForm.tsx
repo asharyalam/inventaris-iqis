@@ -21,7 +21,11 @@ import { Calendar } from '@/components/ui/calendar';
 const formSchema = z.object({
   item_id: z.string().uuid({ message: "Pilih barang yang valid." }),
   quantity: z.number().min(1, { message: "Kuantitas harus minimal 1." }),
+  borrow_start_date: z.date({ required_error: "Tanggal peminjaman wajib diisi." }),
   due_date: z.date({ required_error: "Tanggal pengembalian wajib diisi." }),
+}).refine((data) => data.due_date > data.borrow_start_date, {
+  message: "Tanggal pengembalian harus setelah tanggal peminjaman.",
+  path: ["due_date"],
 });
 
 interface Item {
@@ -59,6 +63,7 @@ const BorrowRequestForm: React.FC = () => {
     defaultValues: {
       item_id: '',
       quantity: 1,
+      borrow_start_date: undefined,
       due_date: undefined,
     },
   });
@@ -87,6 +92,7 @@ const BorrowRequestForm: React.FC = () => {
       item_id: values.item_id,
       user_id: user.id,
       quantity: values.quantity,
+      borrow_start_date: values.borrow_start_date.toISOString(), // Add borrow_start_date
       due_date: values.due_date.toISOString(),
       status: 'Pending',
     });
@@ -158,6 +164,45 @@ const BorrowRequestForm: React.FC = () => {
         />
         <FormField
           control={form.control}
+          name="borrow_start_date"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Tanggal Peminjaman</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full pl-3 text-left font-normal",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value ? (
+                        format(field.value, "PPP")
+                      ) : (
+                        <span>Pilih tanggal peminjaman</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value}
+                    onSelect={field.onChange}
+                    disabled={(date) => date < new Date()} // Disable past dates
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
           name="due_date"
           render={({ field }) => (
             <FormItem className="flex flex-col">
@@ -175,7 +220,7 @@ const BorrowRequestForm: React.FC = () => {
                       {field.value ? (
                         format(field.value, "PPP")
                       ) : (
-                        <span>Pilih tanggal</span>
+                        <span>Pilih tanggal pengembalian</span>
                       )}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
@@ -186,7 +231,7 @@ const BorrowRequestForm: React.FC = () => {
                     mode="single"
                     selected={field.value}
                     onSelect={field.onChange}
-                    disabled={(date) => date < new Date()} // Disable past dates
+                    disabled={(date) => date < (form.getValues('borrow_start_date') || new Date())} // Disable dates before borrow_start_date
                     initialFocus
                   />
                 </PopoverContent>

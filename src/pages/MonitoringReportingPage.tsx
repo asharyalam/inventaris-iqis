@@ -19,6 +19,7 @@ interface Request {
   items: { name: string };
   profiles: { first_name: string; last_name: string; instansi: string };
   due_date?: string; // Only for borrow requests
+  borrow_start_date?: string; // Add borrow_start_date for borrow requests
 }
 
 interface Item {
@@ -39,6 +40,7 @@ const fetchAllTransactions = async (): Promise<Request[]> => {
       request_date,
       status,
       due_date,
+      borrow_start_date,
       items ( name ),
       profiles ( first_name, last_name, instansi )
     `);
@@ -120,6 +122,23 @@ const MonitoringReportingPage: React.FC = () => {
     return <div className="text-center text-red-500">Error memuat stok barang: {itemsError.message}</div>;
   }
 
+  const getStatusDisplay = (status: string) => {
+    switch (status) {
+      case 'Pending':
+        return { text: 'Pending', classes: 'bg-yellow-100 text-yellow-800' };
+      case 'Approved by Headmaster':
+        return { text: 'Disetujui', classes: 'bg-blue-100 text-blue-800' };
+      case 'Approved':
+        return { text: 'Diproses', classes: 'bg-green-100 text-green-800' };
+      case 'Rejected':
+        return { text: 'Ditolak', classes: 'bg-red-100 text-red-800' };
+      case 'Diserahkan':
+        return { text: 'Diserahkan', classes: 'bg-purple-100 text-purple-800' };
+      default:
+        return { text: status, classes: 'bg-gray-100 text-gray-800' };
+    }
+  };
+
   return (
     <div className="w-full max-w-7xl mx-auto p-4 space-y-8">
       <h2 className="text-3xl font-bold mb-6 text-center">Pemantauan & Pelaporan</h2>
@@ -168,31 +187,35 @@ const MonitoringReportingPage: React.FC = () => {
                   <TableHead>Pengaju</TableHead>
                   <TableHead>Instansi</TableHead>
                   <TableHead>Kuantitas</TableHead>
-                  <TableHead>Tanggal Permintaan</TableHead>
+                  <TableHead>Tgl Peminjaman</TableHead> {/* New column */}
+                  <TableHead>Tgl Permintaan</TableHead>
                   <TableHead>Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {transactions.map((transaction) => (
-                  <TableRow key={transaction.id}>
-                    <TableCell className="font-medium">{transaction.type}</TableCell>
-                    <TableCell>{transaction.items?.name || 'N/A'}</TableCell>
-                    <TableCell>{`${transaction.profiles?.first_name || ''} ${transaction.profiles?.last_name || ''}`.trim() || 'N/A'}</TableCell>
-                    <TableCell>{transaction.profiles?.instansi || '-'}</TableCell>
-                    <TableCell>{transaction.quantity}</TableCell>
-                    <TableCell>{format(new Date(transaction.request_date), 'dd MMM yyyy HH:mm', { locale: id })}</TableCell>
-                    <TableCell>
-                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                        transaction.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                        transaction.status === 'Approved by Headmaster' ? 'bg-blue-100 text-blue-800' :
-                        transaction.status === 'Approved' ? 'bg-green-100 text-green-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
-                        {transaction.status}
-                      </span>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {transactions.map((transaction) => {
+                  const statusDisplay = getStatusDisplay(transaction.status);
+                  return (
+                    <TableRow key={transaction.id}>
+                      <TableCell className="font-medium">{transaction.type}</TableCell>
+                      <TableCell>{transaction.items?.name || 'N/A'}</TableCell>
+                      <TableCell>{`${transaction.profiles?.first_name || ''} ${transaction.profiles?.last_name || ''}`.trim() || 'N/A'}</TableCell>
+                      <TableCell>{transaction.profiles?.instansi || '-'}</TableCell>
+                      <TableCell>{transaction.quantity}</TableCell>
+                      <TableCell>
+                        {transaction.type === 'Peminjaman' && transaction.borrow_start_date
+                          ? format(new Date(transaction.borrow_start_date), 'dd MMM yyyy', { locale: id })
+                          : '-'}
+                      </TableCell>
+                      <TableCell>{format(new Date(transaction.request_date), 'dd MMM yyyy HH:mm', { locale: id })}</TableCell>
+                      <TableCell>
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusDisplay.classes}`}>
+                          {statusDisplay.text}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           ) : (
