@@ -11,7 +11,7 @@ import { id } from 'date-fns/locale';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input"; // Import Input component
+import { Input } from "@/components/ui/input";
 import { useSession } from '@/components/SessionContextProvider';
 
 interface BorrowRequest {
@@ -78,7 +78,16 @@ const BorrowRequestsAdminPage: React.FC = () => {
     if (updateError) {
       showError(`Gagal memperbarui permintaan: ${updateError.message}`);
     } else {
-      showSuccess(`Permintaan peminjaman berhasil ${status === 'Approved by Headmaster' ? 'disetujui oleh Kepala Sekolah' : status === 'Approved' ? 'diproses' : 'ditolak'}!`);
+      let successMessage = "";
+      if (status === 'Approved by Headmaster') {
+        successMessage = "Permintaan peminjaman berhasil disetujui!";
+      } else if (status === 'Approved') {
+        successMessage = "Permintaan peminjaman berhasil diproses!";
+      } else if (status === 'Rejected') {
+        successMessage = "Permintaan peminjaman berhasil ditolak!";
+      }
+      showSuccess(successMessage);
+      
       // If approved by admin, update item quantity
       if (status === 'Approved') {
         const { data: itemData, error: itemError } = await supabase
@@ -131,6 +140,21 @@ const BorrowRequestsAdminPage: React.FC = () => {
   const isHeadmaster = userProfile?.role === 'Kepala Sekolah';
   const isAdmin = userProfile?.role === 'Admin';
 
+  const getStatusDisplay = (status: string) => {
+    switch (status) {
+      case 'Pending':
+        return { text: 'Pending', classes: 'bg-yellow-100 text-yellow-800' };
+      case 'Approved by Headmaster':
+        return { text: 'Disetujui', classes: 'bg-blue-100 text-blue-800' };
+      case 'Approved':
+        return { text: 'Diproses', classes: 'bg-green-100 text-green-800' };
+      case 'Rejected':
+        return { text: 'Ditolak', classes: 'bg-red-100 text-red-800' };
+      default:
+        return { text: status, classes: 'bg-gray-100 text-gray-800' };
+    }
+  };
+
   return (
     <div className="w-full max-w-6xl mx-auto p-4">
       <h2 className="text-3xl font-bold mb-6 text-center">Manajemen Permintaan Peminjaman</h2>
@@ -149,38 +173,36 @@ const BorrowRequestsAdminPage: React.FC = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {requests.map((request) => (
-              <TableRow key={request.id}>
-                <TableCell className="font-medium">{request.items?.name || 'N/A'}</TableCell>
-                <TableCell>{`${request.profiles?.first_name || ''} ${request.profiles?.last_name || ''}`.trim() || 'N/A'}</TableCell>
-                <TableCell>{request.profiles?.instansi || '-'}</TableCell>
-                <TableCell>{request.quantity}</TableCell>
-                <TableCell>{format(new Date(request.request_date), 'dd MMM yyyy HH:mm', { locale: id })}</TableCell>
-                <TableCell>{format(new Date(request.due_date), 'dd MMM yyyy', { locale: id })}</TableCell>
-                <TableCell>
-                  <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                    request.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                    request.status === 'Approved by Headmaster' ? 'bg-blue-100 text-blue-800' :
-                    request.status === 'Approved' ? 'bg-green-100 text-green-800' :
-                    'bg-red-100 text-red-800'
-                  }`}>
-                    {request.status}
-                  </span>
-                </TableCell>
-                <TableCell className="text-right">
-                  {isHeadmaster && request.status === 'Pending' && (
-                    <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
-                      Tinjau
-                    </Button>
-                  )}
-                  {isAdmin && request.status === 'Approved by Headmaster' && (
-                    <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
-                      Proses (Admin)
-                    </Button>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
+            {requests.map((request) => {
+              const statusDisplay = getStatusDisplay(request.status);
+              return (
+                <TableRow key={request.id}>
+                  <TableCell className="font-medium">{request.items?.name || 'N/A'}</TableCell>
+                  <TableCell>{`${request.profiles?.first_name || ''} ${request.profiles?.last_name || ''}`.trim() || 'N/A'}</TableCell>
+                  <TableCell>{request.profiles?.instansi || '-'}</TableCell>
+                  <TableCell>{request.quantity}</TableCell>
+                  <TableCell>{format(new Date(request.request_date), 'dd MMM yyyy HH:mm', { locale: id })}</TableCell>
+                  <TableCell>{format(new Date(request.due_date), 'dd MMM yyyy', { locale: id })}</TableCell>
+                  <TableCell>
+                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusDisplay.classes}`}>
+                      {statusDisplay.text}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {isHeadmaster && request.status === 'Pending' && (
+                      <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
+                        Tinjau
+                      </Button>
+                    )}
+                    {isAdmin && request.status === 'Approved by Headmaster' && (
+                      <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
+                        Proses (Admin)
+                      </Button>
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       ) : (
