@@ -190,7 +190,7 @@ const AdminConsumableRequestsPage: React.FC = () => {
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
-                    {isHeadmaster && request.status === 'Pending' && (
+                    {isHeadmaster && request.status === 'Menunggu Persetujuan' && ( // Changed from 'Pending'
                       <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
                         Tinjau
                       </Button>
@@ -200,7 +200,7 @@ const AdminConsumableRequestsPage: React.FC = () => {
                         Proses
                       </Button>
                     )}
-                    {((isHeadmaster && request.status !== 'Pending') || (isAdmin && request.status !== 'Disetujui')) && (
+                    {((isHeadmaster && request.status !== 'Menunggu Persetujuan') || (isAdmin && request.status !== 'Disetujui')) && ( // Changed from 'Pending'
                       <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
                         Lihat Detail
                       </Button>
@@ -248,7 +248,7 @@ const AdminConsumableRequestsPage: React.FC = () => {
           )}
           <DialogFooter>
             <Button variant="destructive" onClick={() => handleAction('Ditolak')}>Tolak</Button>
-            {isHeadmaster && selectedRequest?.status === 'Pending' && (
+            {isHeadmaster && selectedRequest?.status === 'Menunggu Persetujuan' && ( // Changed from 'Pending'
               <Button onClick={() => handleAction('Disetujui')}>Setujui</Button>
             )}
             {isAdmin && selectedRequest?.status === 'Disetujui' && (
