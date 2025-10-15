@@ -22,16 +22,16 @@ interface NavItem {
 const navItems: NavItem[] = [
   { title: "Dashboard", href: "/dashboard", icon: Home, roles: ["Pengguna"] },
   { title: "Dashboard", href: "/admin/dashboard", icon: Home, roles: ["Admin", "Kepala Sekolah"] },
-  { title: "Profil", href: "/profile", icon: UserIcon, roles: ["Pengguna", "Admin"] },
+  { title: "Profil", href: "/profile", icon: UserIcon, roles: ["Pengguna", "Admin", "Kepala Sekolah"] }, // Profil bisa diakses semua
   { title: "Permintaan Habis Pakai", href: "/consumable-requests", icon: Package, roles: ["Pengguna"] },
   { title: "Permintaan Peminjaman", href: "/borrow-requests", icon: Handshake, roles: ["Pengguna"] },
   { title: "Manajemen Barang", href: "/admin/items", icon: Package, roles: ["Admin"] },
   { title: "Tambah Barang Baru", href: "/admin/add-item", icon: PlusCircle, roles: ["Admin"] },
-  { title: "Manajemen Persetujuan Peminjaman", href: "/admin/borrow-requests", icon: Handshake, roles: ["Admin", "Kepala Sekolah"] },
-  { title: "Manajemen Persetujuan Pengembalian", href: "/admin/return-requests", icon: History, roles: ["Admin"] },
-  { title: "Manajemen Persetujuan Habis Pakai", href: "/admin/consumable-requests", icon: Package, roles: ["Admin", "Kepala Sekolah"] },
+  { title: "Manajemen Persetujuan Peminjaman", href: "/admin/borrow-requests", icon: Handshake, roles: ["Kepala Sekolah"] }, // Hanya Kepala Sekolah
+  { title: "Manajemen Persetujuan Pengembalian", href: "/admin/return-requests", icon: History, roles: ["Admin"] }, // Tetap untuk Admin
+  { title: "Manajemen Persetujuan Habis Pakai", href: "/admin/consumable-requests", icon: Package, roles: ["Kepala Sekolah"] }, // Hanya Kepala Sekolah
   { title: "Manajemen Pengguna", href: "/admin/users", icon: Users, roles: ["Admin"] },
-  { title: "Pemantauan & Pelaporan", href: "/admin/monitoring-reporting", icon: BarChart3, roles: ["Admin", "Kepala Sekolah"] },
+  { title: "Pemantauan & Pelaporan", href: "/admin/monitoring-reporting", icon: BarChart3, roles: ["Kepala Sekolah"] }, // Hanya Kepala Sekolah
 ];
 
 const SidebarContent: React.FC<{ userRole: string | null; closeSheet?: () => void }> = ({ userRole, closeSheet }) => {
