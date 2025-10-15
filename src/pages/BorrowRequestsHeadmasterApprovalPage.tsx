@@ -20,6 +20,7 @@ interface BorrowRequest {
   user_id: string;
   quantity: number;
   request_date: string;
+  borrow_start_date: string; // New field
   due_date: string;
   status: string;
   admin_notes: string | null;
@@ -36,6 +37,7 @@ const fetchPendingBorrowRequests = async (): Promise<BorrowRequest[]> => {
       user_id,
       quantity,
       request_date,
+      borrow_start_date,
       due_date,
       status,
       admin_notes,
@@ -114,6 +116,7 @@ const BorrowRequestsHeadmasterApprovalPage: React.FC = () => {
               <TableHead>Instansi</TableHead>
               <TableHead>Kuantitas</TableHead>
               <TableHead>Tanggal Permintaan</TableHead>
+              <TableHead>Tanggal Peminjaman</TableHead> {/* New column header */}
               <TableHead>Tanggal Jatuh Tempo</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Aksi</TableHead>
@@ -127,6 +130,7 @@ const BorrowRequestsHeadmasterApprovalPage: React.FC = () => {
                 <TableCell>{request.profiles?.instansi || '-'}</TableCell>
                 <TableCell>{request.quantity}</TableCell>
                 <TableCell>{format(new Date(request.request_date), 'dd MMM yyyy HH:mm', { locale: id })}</TableCell>
+                <TableCell>{format(new Date(request.borrow_start_date), 'dd MMM yyyy', { locale: id })}</TableCell> {/* Display new field */}
                 <TableCell>{format(new Date(request.due_date), 'dd MMM yyyy', { locale: id })}</TableCell>
                 <TableCell>
                   <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
@@ -170,6 +174,10 @@ const BorrowRequestsHeadmasterApprovalPage: React.FC = () => {
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="quantity" className="text-right">Kuantitas</Label>
                 <Input id="quantity" value={selectedRequest.quantity} className="col-span-3" readOnly />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="borrowDate" className="text-right">Tanggal Peminjaman</Label> {/* New field */}
+                <Input id="borrowDate" value={format(new Date(selectedRequest.borrow_start_date), 'dd MMM yyyy', { locale: id })} className="col-span-3" readOnly />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="dueDate" className="text-right">Tanggal Jatuh Tempo</Label>

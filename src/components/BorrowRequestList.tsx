@@ -14,6 +14,7 @@ interface BorrowRequest {
   user_id: string;
   quantity: number;
   request_date: string;
+  borrow_start_date: string; // New field
   due_date: string;
   status: string;
   admin_notes: string | null;
@@ -29,6 +30,7 @@ const fetchBorrowRequests = async (userId: string): Promise<BorrowRequest[]> => 
       user_id,
       quantity,
       request_date,
+      borrow_start_date,
       due_date,
       status,
       admin_notes,
@@ -66,7 +68,7 @@ const BorrowRequestList: React.FC = () => {
 
   return (
     <div className="w-full max-w-4xl mx-auto">
-      <h3 className="text-2xl font-semibold mb-4">Permintaan Peminjaman Barang Anda</h3>
+      <h3 className="text-2xl font-semibold mb-4">Riwayat Permintaan Peminjaman Barang Anda</h3>
       {requests && requests.length > 0 ? (
         <Table>
           <TableHeader>
@@ -74,6 +76,7 @@ const BorrowRequestList: React.FC = () => {
               <TableHead>Barang</TableHead>
               <TableHead>Kuantitas</TableHead>
               <TableHead>Tanggal Permintaan</TableHead>
+              <TableHead>Tanggal Peminjaman</TableHead> {/* New column header */}
               <TableHead>Tanggal Pengembalian</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Catatan Admin</TableHead>
@@ -85,6 +88,7 @@ const BorrowRequestList: React.FC = () => {
                 <TableCell className="font-medium">{request.items?.name || 'N/A'}</TableCell>
                 <TableCell>{request.quantity}</TableCell>
                 <TableCell>{format(new Date(request.request_date), 'dd MMM yyyy HH:mm', { locale: id })}</TableCell>
+                <TableCell>{format(new Date(request.borrow_start_date), 'dd MMM yyyy', { locale: id })}</TableCell> {/* Display new field */}
                 <TableCell>{format(new Date(request.due_date), 'dd MMM yyyy', { locale: id })}</TableCell>
                 <TableCell>{request.status}</TableCell>
                 <TableCell>{request.admin_notes || '-'}</TableCell>
