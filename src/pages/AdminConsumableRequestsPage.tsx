@@ -9,8 +9,7 @@ import { showSuccess, showError } from '@/utils/toast';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Textarea }
- from "@/components/ui/textarea";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useSession } from '@/components/SessionContextProvider';
@@ -218,7 +217,7 @@ const AdminConsumableRequestsPage: React.FC = () => {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Tinjau Permintaan Barang Habis Pakai</DialogTitle>
+            <DialogTitle>Tinjau Permintaan Barang</DialogTitle>
           </DialogHeader>
           {selectedRequest && (
             <div className="grid gap-4 py-4">
