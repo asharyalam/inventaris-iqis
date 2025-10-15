@@ -70,7 +70,8 @@ const BorrowRequestList: React.FC = () => {
     switch (status) {
       case 'Pending':
         return { text: 'Pending', classes: 'bg-yellow-100 text-yellow-800' };
-      case 'Disetujui': // Updated from 'Disetujui Kepala Sekolah'
+      case 'Approved by Headmaster': // Handle old status value
+      case 'Disetujui':
         return { text: 'Disetujui', classes: 'bg-blue-100 text-blue-800' };
       case 'Diproses':
         return { text: 'Diproses', classes: 'bg-green-100 text-green-800' };
