@@ -5,10 +5,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input"; // Import Input component
 import { showError } from '@/utils/toast';
-import { useSession } from './SessionContextProvider'; // Import useSession
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"; // Import Dialog components
-import EditItemForm from './EditItemForm'; // Import EditItemForm
+import { useSession } from './SessionContextProvider';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import EditItemForm from './EditItemForm';
 
 interface Item {
   id: string;
@@ -19,8 +20,15 @@ interface Item {
   created_at: string;
 }
 
-const fetchItems = async (): Promise<Item[]> => {
-  const { data, error } = await supabase.from('items').select('*').order('created_at', { ascending: false });
+// Modifikasi fetchItems untuk menerima searchTerm
+const fetchItems = async (searchTerm: string = ''): Promise<Item[]> => {
+  let query = supabase.from('items').select('*');
+
+  if (searchTerm) {
+    query = query.ilike('name', `%${searchTerm}%`); // Mencari berdasarkan nama barang
+  }
+
+  const { data, error } = await query.order('created_at', { ascending: false });
   if (error) {
     throw new Error(error.message);
   }
@@ -28,11 +36,12 @@ const fetchItems = async (): Promise<Item[]> => {
 };
 
 const ItemList: React.FC = () => {
+  const [searchTerm, setSearchTerm] = useState(''); // State untuk input pencarian
   const { data: items, isLoading, error, refetch } = useQuery<Item[], Error>({
-    queryKey: ['items'],
-    queryFn: fetchItems,
+    queryKey: ['items', searchTerm], // Tambahkan searchTerm ke queryKey
+    queryFn: () => fetchItems(searchTerm), // Panggil fetchItems dengan searchTerm
   });
-  const { userProfile } = useSession(); // Dapatkan profil pengguna
+  const { userProfile } = useSession();
   const isAdmin = userProfile?.role === 'Admin';
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -46,7 +55,7 @@ const ItemList: React.FC = () => {
     if (error) {
       showError(`Gagal menghapus barang: ${error.message}`);
     } else {
-      refetch(); // Refresh the list after deletion
+      refetch();
     }
   };
 
@@ -58,7 +67,7 @@ const ItemList: React.FC = () => {
   const handleEditSuccess = () => {
     setIsEditDialogOpen(false);
     setEditingItem(null);
-    refetch(); // Refetch items after successful edit
+    refetch();
   };
 
   if (isLoading) {
@@ -72,6 +81,15 @@ const ItemList: React.FC = () => {
   return (
     <div className="w-full max-w-4xl mx-auto">
       <h3 className="text-2xl font-semibold mb-4">Daftar Barang</h3>
+      <div className="mb-4">
+        <Input
+          type="text"
+          placeholder="Cari barang berdasarkan nama..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full"
+        />
+      </div>
       {items && items.length > 0 ? (
         <Table>
           <TableHeader>
@@ -105,7 +123,7 @@ const ItemList: React.FC = () => {
           </TableBody>
         </Table>
       ) : (
-        <p className="text-center text-gray-500">Belum ada barang yang ditambahkan.</p>
+        <p className="text-center text-gray-500">Belum ada barang yang ditambahkan atau tidak ditemukan.</p>
       )}
 
       {editingItem && (
