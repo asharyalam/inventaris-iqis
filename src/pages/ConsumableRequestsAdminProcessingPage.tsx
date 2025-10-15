@@ -129,7 +129,7 @@ const ConsumableRequestsAdminProcessingPage: React.FC = () => {
 
   return (
     <div className="w-full max-w-6xl mx-auto p-4">
-      <h2 className="text-3xl font-bold mb-6 text-center">Pemrosesan Permintaan Barang Habis Pakai</h2>
+      <h2 className="text-3xl font-bold mb-6 text-center">Pemrosesan Permintaan</h2>
       {requests && requests.length > 0 ? (
         <Table>
           <TableHeader>

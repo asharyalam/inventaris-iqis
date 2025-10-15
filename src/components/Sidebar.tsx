@@ -89,7 +89,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               </Link>
               <Link to="/admin/consumable-processing" className={cn(commonLinkClasses, location.pathname === '/admin/consumable-processing' && activeLinkClasses)} onClick={onClose}>
                 <ClipboardList className="h-4 w-4" />
-                Proses Habis Pakai
+                Pemrosesan Permintaan
               </Link>
               <Link to="/admin/borrow-processing" className={cn(commonLinkClasses, location.pathname === '/admin/borrow-processing' && activeLinkClasses)} onClick={onClose}>
                 <Handshake className="h-4 w-4" />
