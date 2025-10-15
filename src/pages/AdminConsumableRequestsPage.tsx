@@ -165,7 +165,7 @@ const AdminConsumableRequestsPage: React.FC = () => {
                 <TableCell className="text-right">
                   {isHeadmaster && request.status === 'Pending' && (
                     <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
-                      Tinjau (Kepala Sekolah)
+                      Tinjau
                     </Button>
                   )}
                   {isAdmin && request.status === 'Approved by Headmaster' && (
@@ -216,7 +216,7 @@ const AdminConsumableRequestsPage: React.FC = () => {
           <DialogFooter>
             <Button variant="destructive" onClick={() => handleAction('Rejected')}>Tolak</Button>
             {isHeadmaster && selectedRequest?.status === 'Pending' && (
-              <Button onClick={() => handleAction('Approved by Headmaster')}>Setujui (Kepala Sekolah)</Button>
+              <Button onClick={() => handleAction('Approved by Headmaster')}>Setujui</Button>
             )}
             {isAdmin && selectedRequest?.status === 'Approved by Headmaster' && (
               <Button onClick={() => handleAction('Approved')}>Proses (Admin)</Button>
