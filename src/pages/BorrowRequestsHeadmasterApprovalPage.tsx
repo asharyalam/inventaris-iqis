@@ -14,30 +14,30 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useSession } from '@/components/SessionContextProvider';
 
-interface ReturnRequest {
+interface BorrowRequest {
   id: string;
   item_id: string;
   user_id: string;
   quantity: number;
   request_date: string;
+  due_date: string;
   status: string;
-  condition_description: string | null;
   admin_notes: string | null;
   items: { name: string };
   profiles: { first_name: string; last_name: string; instansi: string };
 }
 
-const fetchPendingReturnRequests = async (): Promise<ReturnRequest[]> => {
+const fetchPendingBorrowRequests = async (): Promise<BorrowRequest[]> => {
   const { data, error } = await supabase
-    .from('return_requests')
+    .from('borrow_requests')
     .select(`
       id,
       item_id,
       user_id,
       quantity,
       request_date,
+      due_date,
       status,
-      condition_description,
       admin_notes,
       items ( name ),
       profiles ( first_name, last_name, instansi )
@@ -51,26 +51,26 @@ const fetchPendingReturnRequests = async (): Promise<ReturnRequest[]> => {
   return data || [];
 };
 
-const ReturnRequestsAdminPage: React.FC = () => {
+const BorrowRequestsHeadmasterApprovalPage: React.FC = () => {
   const queryClient = useQueryClient();
   const { user } = useSession();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedRequest, setSelectedRequest] = useState<ReturnRequest | null>(null);
-  const [adminNotes, setAdminNotes] = useState('');
+  const [selectedRequest, setSelectedRequest] = useState<BorrowRequest | null>(null);
+  const [headmasterNotes, setHeadmasterNotes] = useState('');
 
-  const { data: requests, isLoading, error, refetch } = useQuery<ReturnRequest[], Error>({
-    queryKey: ['adminReturnRequests'],
-    queryFn: fetchPendingReturnRequests,
+  const { data: requests, isLoading, error, refetch } = useQuery<BorrowRequest[], Error>({
+    queryKey: ['headmasterBorrowApprovals'],
+    queryFn: fetchPendingBorrowRequests,
   });
 
-  const handleAction = async (status: 'Dikembalikan' | 'Rejected') => {
+  const handleAction = async (status: 'Approved by Headmaster' | 'Rejected by Headmaster') => {
     if (!selectedRequest || !user) return;
 
     const { error: updateError } = await supabase
-      .from('return_requests')
+      .from('borrow_requests')
       .update({
         status: status,
-        admin_notes: adminNotes,
+        admin_notes: headmasterNotes, // Using admin_notes for headmaster notes for simplicity
         approved_by: user.id,
         approval_date: new Date().toISOString(),
       })
@@ -79,80 +79,23 @@ const ReturnRequestsAdminPage: React.FC = () => {
     if (updateError) {
       showError(`Gagal memperbarui permintaan: ${updateError.message}`);
     } else {
-      showSuccess(`Pengajuan pengembalian berhasil ${status === 'Dikembalikan' ? 'diterima' : 'ditolak'} oleh Admin!`);
-      // If approved, update item quantity and the original borrow request status
-      if (status === 'Dikembalikan') {
-        // First, update the item quantity
-        const { data: itemData, error: itemError } = await supabase
-          .from('items')
-          .select('quantity')
-          .eq('id', selectedRequest.item_id)
-          .single();
-
-        if (itemError) {
-          showError(`Gagal mengambil kuantitas barang: ${itemError.message}`);
-        } else {
-          const newQuantity = itemData.quantity + selectedRequest.quantity;
-          const { error: updateItemError } = await supabase
-            .from('items')
-            .update({ quantity: newQuantity })
-            .eq('id', selectedRequest.item_id);
-
-          if (updateItemError) {
-            showError(`Gagal memperbarui kuantitas barang: ${updateItemError.message}`);
-          } else {
-            showSuccess("Kuantitas barang berhasil diperbarui.");
-            queryClient.invalidateQueries({ queryKey: ['items'] });
-            queryClient.invalidateQueries({ queryKey: ['inventorySummary'] });
-            queryClient.invalidateQueries({ queryKey: ['availableItemsForBorrow'] });
-          }
-        }
-
-        // Second, find and update the corresponding borrow request status to 'Dikembalikan'
-        const { data: borrowRequestData, error: borrowRequestError } = await supabase
-          .from('borrow_requests')
-          .select('id')
-          .eq('item_id', selectedRequest.item_id)
-          .eq('user_id', selectedRequest.user_id)
-          .eq('quantity', selectedRequest.quantity)
-          .eq('status', 'Sedang Dipinjam')
-          .order('request_date', { ascending: false })
-          .limit(1)
-          .single();
-
-        if (borrowRequestError && borrowRequestError.code !== 'PGRST116') { // PGRST116 means no rows found
-          showError(`Gagal menemukan permintaan peminjaman terkait: ${borrowRequestError.message}`);
-        } else if (borrowRequestData) {
-          const { error: updateBorrowError } = await supabase
-            .from('borrow_requests')
-            .update({ status: 'Dikembalikan' })
-            .eq('id', borrowRequestData.id);
-
-          if (updateBorrowError) {
-            showError(`Gagal memperbarui status permintaan peminjaman: ${updateBorrowError.message}`);
-          } else {
-            showSuccess("Status permintaan peminjaman terkait berhasil diperbarui.");
-            queryClient.invalidateQueries({ queryKey: ['borrowRequests'] }); // Invalidate user's borrow list
-            queryClient.invalidateQueries({ queryKey: ['adminBorrowProcessing'] }); // Invalidate admin borrow processing
-          }
-        }
-      }
+      showSuccess(`Permintaan peminjaman berhasil ${status === 'Approved by Headmaster' ? 'disetujui' : 'ditolak'} oleh Kepala Sekolah!`);
       refetch();
-      queryClient.invalidateQueries({ queryKey: ['userReturnRequests'] }); // Invalidate user's return list
+      queryClient.invalidateQueries({ queryKey: ['adminBorrowProcessing'] }); // Invalidate admin processing page
       setIsDialogOpen(false);
       setSelectedRequest(null);
-      setAdminNotes('');
+      setHeadmasterNotes('');
     }
   };
 
-  const openDialog = (request: ReturnRequest) => {
+  const openDialog = (request: BorrowRequest) => {
     setSelectedRequest(request);
-    setAdminNotes(request.admin_notes || '');
+    setHeadmasterNotes(request.admin_notes || '');
     setIsDialogOpen(true);
   };
 
   if (isLoading) {
-    return <div className="text-center">Memuat permintaan pengembalian...</div>;
+    return <div className="text-center">Memuat permintaan peminjaman...</div>;
   }
 
   if (error) {
@@ -161,17 +104,17 @@ const ReturnRequestsAdminPage: React.FC = () => {
 
   return (
     <div className="w-full max-w-6xl mx-auto p-4">
-      <h2 className="text-3xl font-bold mb-6 text-center">Manajemen Pengajuan Pengembalian</h2>
+      <h2 className="text-3xl font-bold mb-6 text-center">Persetujuan Permintaan Peminjaman Barang</h2>
       {requests && requests.length > 0 ? (
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Barang</TableHead>
-              <TableHead>Pengaju</TableHead>
+              <TableHead>Peminjam</TableHead>
               <TableHead>Instansi</TableHead>
               <TableHead>Kuantitas</TableHead>
-              <TableHead>Tanggal Pengajuan</TableHead>
-              <TableHead>Kondisi</TableHead>
+              <TableHead>Tanggal Permintaan</TableHead>
+              <TableHead>Tanggal Jatuh Tempo</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Aksi</TableHead>
             </TableRow>
@@ -184,11 +127,11 @@ const ReturnRequestsAdminPage: React.FC = () => {
                 <TableCell>{request.profiles?.instansi || '-'}</TableCell>
                 <TableCell>{request.quantity}</TableCell>
                 <TableCell>{format(new Date(request.request_date), 'dd MMM yyyy HH:mm', { locale: id })}</TableCell>
-                <TableCell>{request.condition_description || '-'}</TableCell>
+                <TableCell>{format(new Date(request.due_date), 'dd MMM yyyy', { locale: id })}</TableCell>
                 <TableCell>
                   <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
                     request.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                    request.status === 'Dikembalikan' ? 'bg-green-100 text-green-800' :
+                    request.status === 'Approved by Headmaster' ? 'bg-green-100 text-green-800' :
                     'bg-red-100 text-red-800'
                   }`}>
                     {request.status}
@@ -206,13 +149,13 @@ const ReturnRequestsAdminPage: React.FC = () => {
           </TableBody>
         </Table>
       ) : (
-        <p className="text-center text-gray-500">Tidak ada pengajuan pengembalian barang.</p>
+        <p className="text-center text-gray-500">Tidak ada permintaan peminjaman barang yang perlu disetujui.</p>
       )}
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Tinjau Pengajuan Pengembalian</DialogTitle>
+            <DialogTitle>Tinjau Permintaan Peminjaman</DialogTitle>
           </DialogHeader>
           {selectedRequest && (
             <div className="grid gap-4 py-4">
@@ -221,7 +164,7 @@ const ReturnRequestsAdminPage: React.FC = () => {
                 <Input id="item" value={selectedRequest.items?.name || 'N/A'} className="col-span-3" readOnly />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="user" className="text-right">Pengaju</Label>
+                <Label htmlFor="user" className="text-right">Peminjam</Label>
                 <Input id="user" value={`${selectedRequest.profiles?.first_name || ''} ${selectedRequest.profiles?.last_name || ''}`.trim() || 'N/A'} className="col-span-3" readOnly />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
@@ -229,24 +172,24 @@ const ReturnRequestsAdminPage: React.FC = () => {
                 <Input id="quantity" value={selectedRequest.quantity} className="col-span-3" readOnly />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="condition" className="text-right">Kondisi Pengajuan</Label>
-                <Textarea id="condition" value={selectedRequest.condition_description || '-'} className="col-span-3" readOnly />
+                <Label htmlFor="dueDate" className="text-right">Tanggal Jatuh Tempo</Label>
+                <Input id="dueDate" value={format(new Date(selectedRequest.due_date), 'dd MMM yyyy', { locale: id })} className="col-span-3" readOnly />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="notes" className="text-right">Catatan Admin</Label>
+                <Label htmlFor="notes" className="text-right">Catatan Kepala Sekolah</Label>
                 <Textarea
                   id="notes"
-                  value={adminNotes}
-                  onChange={(e) => setAdminNotes(e.target.value)}
+                  value={headmasterNotes}
+                  onChange={(e) => setHeadmasterNotes(e.target.value)}
                   className="col-span-3"
-                  placeholder="Tambahkan catatan admin..."
+                  placeholder="Tambahkan catatan..."
                 />
               </div>
             </div>
           )}
           <DialogFooter>
-            <Button variant="destructive" onClick={() => handleAction('Rejected')}>Tolak</Button>
-            <Button onClick={() => handleAction('Dikembalikan')}>Terima Pengembalian</Button>
+            <Button variant="destructive" onClick={() => handleAction('Rejected by Headmaster')}>Tolak</Button>
+            <Button onClick={() => handleAction('Approved by Headmaster')}>Setujui</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -254,4 +197,4 @@ const ReturnRequestsAdminPage: React.FC = () => {
   );
 };
 
-export default ReturnRequestsAdminPage;
+export default BorrowRequestsHeadmasterApprovalPage;

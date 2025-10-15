@@ -8,18 +8,20 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 
 const Login = () => {
-  const { session, isLoading, isAdmin } = useSession();
+  const { session, isLoading, isAdmin, isHeadmaster } = useSession();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!isLoading && session) {
       if (isAdmin) {
         navigate('/admin/dashboard', { replace: true });
+      } else if (isHeadmaster) {
+        navigate('/headmaster/dashboard', { replace: true }); // Redirect Headmaster
       } else {
         navigate('/dashboard', { replace: true });
       }
     }
-  }, [session, isLoading, isAdmin, navigate]);
+  }, [session, isLoading, isAdmin, isHeadmaster, navigate]);
 
   if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center">Memuat...</div>;

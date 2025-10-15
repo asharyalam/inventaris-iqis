@@ -3,7 +3,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, History, Handshake } from 'lucide-react';
+import { Package, History, Handshake, RotateCcw } from 'lucide-react'; // Added RotateCcw icon
 import { useSession } from '@/components/SessionContextProvider';
 import { Button } from '@/components/ui/button';
 
@@ -46,6 +46,21 @@ const UserDashboard: React.FC = () => {
             </p>
             <Link to="/borrow-requests">
               <Button className="w-full">Buat Permintaan</Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Pengajuan Pengembalian Barang</CardTitle>
+            <RotateCcw className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">
+              Ajukan pengembalian barang inventaris yang telah Anda pinjam.
+            </p>
+            <Link to="/return-requests">
+              <Button className="w-full">Ajukan Pengembalian</Button>
             </Link>
           </CardContent>
         </Card>

@@ -20,6 +20,7 @@ interface SessionContextType {
   userProfile: UserProfile | null;
   isLoading: boolean;
   isAdmin: boolean;
+  isHeadmaster: boolean; // Added isHeadmaster
 }
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
@@ -81,9 +82,10 @@ export const SessionContextProvider = ({ children }: { children: ReactNode }) =>
   }, [user]);
 
   const isAdmin = userProfile?.role === 'Admin';
+  const isHeadmaster = userProfile?.role === 'Kepala Sekolah'; // New headmaster check
 
   return (
-    <SessionContext.Provider value={{ session, user, userProfile, isLoading, isAdmin }}>
+    <SessionContext.Provider value={{ session, user, userProfile, isLoading, isAdmin, isHeadmaster }}>
       {children}
     </SessionContext.Provider>
   );
