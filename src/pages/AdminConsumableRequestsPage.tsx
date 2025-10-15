@@ -11,6 +11,7 @@ import { id } from 'date-fns/locale';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input"; // Import Input component
 import { useSession } from '@/components/SessionContextProvider';
 
 interface ConsumableRequest {
