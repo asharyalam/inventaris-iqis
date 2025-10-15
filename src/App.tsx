@@ -21,7 +21,8 @@ import AddItemForm from "./components/AddItemForm";
 import AppLayout from "./components/AppLayout";
 import AdminConsumableRequestsPage from "./pages/AdminConsumableRequestsPage";
 import MonitoringReportingPage from "./pages/MonitoringReportingPage";
-import ProfilePage from "./pages/ProfilePage"; // Import the new ProfilePage
+import ProfilePage from "./pages/ProfilePage";
+import ReturnRequestsPage from "./pages/ReturnRequestsPage"; // Import the new ReturnRequestsPage
 
 const queryClient = new QueryClient();
 
@@ -43,9 +44,10 @@ const App = () => (
             <Route element={<ProtectedRoute allowedRoles={['Pengguna', 'Admin', 'Kepala Sekolah']} />}>
               <Route element={<AppLayout />}>
                 <Route path="/dashboard" element={<UserDashboard />} />
-                <Route path="/profile" element={<ProfilePage />} /> {/* New Profile Page Route */}
+                <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/consumable-requests" element={<ConsumableRequestsPage />} />
                 <Route path="/borrow-requests" element={<BorrowRequestsPage />} />
+                <Route path="/return-requests" element={<ReturnRequestsPage />} /> {/* New Return Page Route */}
                 {/* Admin/Headmaster specific routes */}
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                 <Route path="/admin/items" element={<ItemList />} />

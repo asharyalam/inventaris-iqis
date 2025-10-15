@@ -24,6 +24,10 @@ interface BorrowRequest {
   borrow_start_date: string;
   status: string;
   admin_notes: string | null;
+  approved_by: string | null;
+  approval_date: string | null;
+  returned_date: string | null; // New field
+  returned_by: string | null;   // New field
   items: { name: string };
   profiles: { first_name: string; last_name: string; instansi: string };
 }
@@ -41,6 +45,10 @@ const fetchAllBorrowRequests = async (): Promise<BorrowRequest[]> => {
       borrow_start_date,
       status,
       admin_notes,
+      approved_by,
+      approval_date,
+      returned_date,
+      returned_by,
       items ( name ),
       profiles ( first_name, last_name, instansi )
     `)
@@ -64,12 +72,18 @@ const BorrowRequestsAdminPage: React.FC = () => {
     queryFn: fetchAllBorrowRequests,
   });
 
-  const handleAction = async (actionType: 'approve' | 'reject' | 'handover') => {
+  const handleAction = async (actionType: 'approve' | 'reject' | 'handover' | 'return') => {
     if (!selectedRequest || !user) return;
 
     let newStatus: string;
     let successMessage: string;
     let shouldDecrementQuantity = false;
+    let shouldIncrementQuantity = false;
+    let updatePayload: any = {
+      admin_notes: adminNotes,
+      approved_by: user.id,
+      approval_date: new Date().toISOString(),
+    };
 
     if (actionType === 'approve') {
       newStatus = 'Disetujui';
@@ -78,21 +92,27 @@ const BorrowRequestsAdminPage: React.FC = () => {
       newStatus = 'Ditolak';
       successMessage = "Permintaan peminjaman berhasil ditolak!";
     } else if (actionType === 'handover') {
-      newStatus = 'Diproses'; // Status becomes 'Diproses' upon handover
+      newStatus = 'Diproses';
       successMessage = "Barang berhasil diserahkan kepada peminjam!";
-      shouldDecrementQuantity = true; // Decrement quantity upon handover
+      shouldDecrementQuantity = true;
+    } else if (actionType === 'return') {
+      newStatus = 'Dikembalikan';
+      successMessage = "Barang berhasil dikembalikan!";
+      shouldIncrementQuantity = true;
+      updatePayload = {
+        ...updatePayload,
+        returned_date: new Date().toISOString(),
+        returned_by: user.id,
+      };
     } else {
-      return; // Should not happen
+      return;
     }
+
+    updatePayload.status = newStatus;
 
     const { error: updateError } = await supabase
       .from('borrow_requests')
-      .update({
-        status: newStatus,
-        admin_notes: adminNotes,
-        approved_by: user.id,
-        approval_date: new Date().toISOString(),
-      })
+      .update(updatePayload)
       .eq('id', selectedRequest.id);
 
     if (updateError) {
@@ -100,7 +120,7 @@ const BorrowRequestsAdminPage: React.FC = () => {
     } else {
       showSuccess(successMessage);
 
-      if (shouldDecrementQuantity) {
+      if (shouldDecrementQuantity || shouldIncrementQuantity) {
         const { data: itemData, error: itemError } = await supabase
           .from('items')
           .select('quantity')
@@ -110,7 +130,10 @@ const BorrowRequestsAdminPage: React.FC = () => {
         if (itemError) {
           showError(`Gagal mengambil kuantitas barang: ${itemError.message}`);
         } else {
-          const newQuantity = itemData.quantity - selectedRequest.quantity;
+          const newQuantity = shouldDecrementQuantity
+            ? itemData.quantity - selectedRequest.quantity
+            : itemData.quantity + selectedRequest.quantity;
+
           const { error: updateItemError } = await supabase
             .from('items')
             .update({ quantity: newQuantity })
@@ -155,11 +178,12 @@ const BorrowRequestsAdminPage: React.FC = () => {
     switch (status) {
       case 'Pending':
         return { text: 'Pending', classes: 'bg-yellow-100 text-yellow-800' };
-      case 'Approved by Headmaster': // Handle old status value
       case 'Disetujui':
         return { text: 'Disetujui', classes: 'bg-blue-100 text-blue-800' };
       case 'Diproses':
         return { text: 'Diproses', classes: 'bg-green-100 text-green-800' };
+      case 'Dikembalikan': // New status
+        return { text: 'Dikembalikan', classes: 'bg-purple-100 text-purple-800' };
       case 'Ditolak':
         return { text: 'Ditolak', classes: 'bg-red-100 text-red-800' };
       default:
@@ -206,16 +230,21 @@ const BorrowRequestsAdminPage: React.FC = () => {
                         Tinjau
                       </Button>
                     )}
-                    {isAdmin && request.status === 'Disetujui' && ( // Admin sees 'Disetujui' after Headmaster approves
-                      <>
-                        <Button variant="outline" size="sm" onClick={() => handleAction('handover')}>
-                          Serahkan
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
-                          Tinjau
-                        </Button>
-                      </>
+                    {isAdmin && request.status === 'Disetujui' && (
+                      <Button variant="outline" size="sm" onClick={() => handleAction('handover')}>
+                        Serahkan
+                      </Button>
                     )}
+                    {isAdmin && request.status === 'Diproses' && ( // New button for Admin to process return
+                      <Button variant="outline" size="sm" onClick={() => handleAction('return')}>
+                        Proses Pengembalian
+                      </Button>
+                    )}
+                    {(isHeadmaster && request.status !== 'Pending') || (isAdmin && request.status !== 'Disetujui' && request.status !== 'Diproses') ? (
+                      <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
+                        Lihat Detail
+                      </Button>
+                    ) : null}
                   </TableCell>
                 </TableRow>
               );
@@ -253,6 +282,12 @@ const BorrowRequestsAdminPage: React.FC = () => {
                 <Label htmlFor="dueDate" className="text-right">Tanggal Jatuh Tempo</Label>
                 <Input id="dueDate" value={format(new Date(selectedRequest.due_date), 'dd MMM yyyy', { locale: id })} className="col-span-3" readOnly />
               </div>
+              {selectedRequest.returned_date && (
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="returnedDate" className="text-right">Tanggal Dikembalikan</Label>
+                  <Input id="returnedDate" value={format(new Date(selectedRequest.returned_date), 'dd MMM yyyy', { locale: id })} className="col-span-3" readOnly />
+                </div>
+              )}
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="notes" className="text-right">Catatan Admin</Label>
                 <Textarea
@@ -261,17 +296,29 @@ const BorrowRequestsAdminPage: React.FC = () => {
                   onChange={(e) => setAdminNotes(e.target.value)}
                   className="col-span-3"
                   placeholder="Tambahkan catatan admin..."
+                  readOnly={selectedRequest.status !== 'Pending' && selectedRequest.status !== 'Disetujui' && selectedRequest.status !== 'Diproses'}
                 />
               </div>
             </div>
           )}
           <DialogFooter>
-            <Button variant="destructive" onClick={() => handleAction('reject')}>Tolak</Button>
             {isHeadmaster && selectedRequest?.status === 'Pending' && (
-              <Button onClick={() => handleAction('approve')}>Setujui</Button>
+              <>
+                <Button variant="destructive" onClick={() => handleAction('reject')}>Tolak</Button>
+                <Button onClick={() => handleAction('approve')}>Setujui</Button>
+              </>
             )}
             {isAdmin && selectedRequest?.status === 'Disetujui' && (
-              <Button onClick={() => handleAction('handover')}>Serahkan</Button>
+              <>
+                <Button variant="destructive" onClick={() => handleAction('reject')}>Tolak</Button>
+                <Button onClick={() => handleAction('handover')}>Serahkan</Button>
+              </>
+            )}
+            {isAdmin && selectedRequest?.status === 'Diproses' && (
+              <>
+                <Button variant="destructive" onClick={() => handleAction('reject')}>Tolak</Button>
+                <Button onClick={() => handleAction('return')}>Proses Pengembalian</Button>
+              </>
             )}
           </DialogFooter>
         </DialogContent>

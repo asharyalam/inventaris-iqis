@@ -20,6 +20,7 @@ interface Request {
   profiles: { first_name: string; last_name: string; instansi: string };
   due_date?: string; // Only for borrow requests
   borrow_start_date?: string; // Add borrow_start_date for borrow requests
+  returned_date?: string; // New field for borrow requests
 }
 
 interface Item {
@@ -41,6 +42,7 @@ const fetchAllTransactions = async (): Promise<Request[]> => {
       status,
       due_date,
       borrow_start_date,
+      returned_date,
       items ( name ),
       profiles ( first_name, last_name, instansi )
     `);
@@ -126,13 +128,13 @@ const MonitoringReportingPage: React.FC = () => {
     switch (status) {
       case 'Pending':
         return { text: 'Pending', classes: 'bg-yellow-100 text-yellow-800' };
-      case 'Approved by Headmaster': // Handle old status value
       case 'Disetujui':
         return { text: 'Disetujui', classes: 'bg-blue-100 text-blue-800' };
-      case 'Approved': // Old status, will be replaced by 'Diproses'
       case 'Diproses':
         return { text: 'Diproses', classes: 'bg-green-100 text-green-800' };
-      case 'Rejected':
+      case 'Dikembalikan': // New status
+        return { text: 'Dikembalikan', classes: 'bg-purple-100 text-purple-800' };
+      case 'Ditolak':
         return { text: 'Ditolak', classes: 'bg-red-100 text-red-800' };
       default:
         return { text: status, classes: 'bg-gray-100 text-gray-800' };
@@ -188,7 +190,8 @@ const MonitoringReportingPage: React.FC = () => {
                   <TableHead>Instansi</TableHead>
                   <TableHead>Kuantitas</TableHead>
                   <TableHead>Tgl Peminjaman</TableHead>
-                  <TableHead>Tgl Permintaan</TableHead>
+                  <TableHead>Tgl Jatuh Tempo</TableHead>
+                  <TableHead>Tgl Dikembalikan</TableHead> {/* New TableHead */}
                   <TableHead>Status</TableHead>
                 </TableRow>
               </TableHeader>
@@ -207,7 +210,16 @@ const MonitoringReportingPage: React.FC = () => {
                           ? format(new Date(transaction.borrow_start_date), 'dd MMM yyyy', { locale: id })
                           : '-'}
                       </TableCell>
-                      <TableCell>{format(new Date(transaction.request_date), 'dd MMM yyyy HH:mm', { locale: id })}</TableCell>
+                      <TableCell>
+                        {transaction.type === 'Peminjaman' && transaction.due_date
+                          ? format(new Date(transaction.due_date), 'dd MMM yyyy', { locale: id })
+                          : '-'}
+                      </TableCell>
+                      <TableCell>
+                        {transaction.type === 'Peminjaman' && transaction.returned_date
+                          ? format(new Date(transaction.returned_date), 'dd MMM yyyy', { locale: id })
+                          : '-'}
+                      </TableCell> {/* New TableCell */}
                       <TableCell>
                         <span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusDisplay.classes}`}>
                           {statusDisplay.text}

@@ -18,6 +18,7 @@ interface BorrowRequest {
   borrow_start_date: string;
   status: string;
   admin_notes: string | null;
+  returned_date: string | null; // New field
   items: { name: string };
 }
 
@@ -34,6 +35,7 @@ const fetchBorrowRequests = async (userId: string): Promise<BorrowRequest[]> => 
       borrow_start_date,
       status,
       admin_notes,
+      returned_date,
       items ( name )
     `)
     .eq('user_id', userId)
@@ -70,11 +72,12 @@ const BorrowRequestList: React.FC = () => {
     switch (status) {
       case 'Pending':
         return { text: 'Pending', classes: 'bg-yellow-100 text-yellow-800' };
-      case 'Approved by Headmaster': // Handle old status value
       case 'Disetujui':
         return { text: 'Disetujui', classes: 'bg-blue-100 text-blue-800' };
       case 'Diproses':
         return { text: 'Diproses', classes: 'bg-green-100 text-green-800' };
+      case 'Dikembalikan': // New status
+        return { text: 'Dikembalikan', classes: 'bg-purple-100 text-purple-800' };
       case 'Ditolak':
         return { text: 'Ditolak', classes: 'bg-red-100 text-red-800' };
       default:
@@ -94,6 +97,7 @@ const BorrowRequestList: React.FC = () => {
               <TableHead>Tgl Permintaan</TableHead>
               <TableHead>Tgl Peminjaman</TableHead>
               <TableHead>Tgl Pengembalian</TableHead>
+              <TableHead>Tgl Dikembalikan</TableHead> {/* New TableHead */}
               <TableHead>Status</TableHead>
               <TableHead>Catatan Admin</TableHead>
             </TableRow>
@@ -108,6 +112,9 @@ const BorrowRequestList: React.FC = () => {
                   <TableCell>{format(new Date(request.request_date), 'dd MMM yyyy HH:mm', { locale: id })}</TableCell>
                   <TableCell>{format(new Date(request.borrow_start_date), 'dd MMM yyyy', { locale: id })}</TableCell>
                   <TableCell>{format(new Date(request.due_date), 'dd MMM yyyy', { locale: id })}</TableCell>
+                  <TableCell>
+                    {request.returned_date ? format(new Date(request.returned_date), 'dd MMM yyyy', { locale: id }) : '-'}
+                  </TableCell> {/* New TableCell */}
                   <TableCell>
                     <span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusDisplay.classes}`}>
                       {statusDisplay.text}

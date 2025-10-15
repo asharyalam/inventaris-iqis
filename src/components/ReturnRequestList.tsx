@@ -8,7 +8,7 @@ import { useSession } from './SessionContextProvider';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 
-interface ConsumableRequest {
+interface ReturnRequest {
   id: string;
   item_id: string;
   user_id: string;
@@ -19,9 +19,9 @@ interface ConsumableRequest {
   items: { name: string };
 }
 
-const fetchConsumableRequests = async (userId: string): Promise<ConsumableRequest[]> => {
+const fetchReturnRequests = async (userId: string): Promise<ReturnRequest[]> => {
   const { data, error } = await supabase
-    .from('consumable_requests')
+    .from('return_requests')
     .select(`
       id,
       item_id,
@@ -41,12 +41,12 @@ const fetchConsumableRequests = async (userId: string): Promise<ConsumableReques
   return data || [];
 };
 
-const ConsumableRequestList: React.FC = () => {
+const ReturnRequestList: React.FC = () => {
   const { user } = useSession();
 
-  const { data: requests, isLoading, error } = useQuery<ConsumableRequest[], Error>({
-    queryKey: ['consumableRequests', user?.id],
-    queryFn: () => fetchConsumableRequests(user!.id),
+  const { data: requests, isLoading, error } = useQuery<ReturnRequest[], Error>({
+    queryKey: ['returnRequests', user?.id],
+    queryFn: () => fetchReturnRequests(user!.id),
     enabled: !!user?.id,
   });
 
@@ -55,7 +55,7 @@ const ConsumableRequestList: React.FC = () => {
   }
 
   if (isLoading) {
-    return <div className="text-center">Memuat permintaan barang habis pakai...</div>;
+    return <div className="text-center">Memuat permintaan pengembalian barang...</div>;
   }
 
   if (error) {
@@ -66,13 +66,9 @@ const ConsumableRequestList: React.FC = () => {
     switch (status) {
       case 'Pending':
         return { text: 'Pending', classes: 'bg-yellow-100 text-yellow-800' };
-      case 'Approved by Headmaster': // Old status, will be replaced by 'Disetujui'
       case 'Disetujui':
-        return { text: 'Disetujui', classes: 'bg-blue-100 text-blue-800' };
-      case 'Approved': // Old status, will be replaced by 'Diproses'
-      case 'Diproses':
-        return { text: 'Diproses', classes: 'bg-green-100 text-green-800' };
-      case 'Rejected':
+        return { text: 'Disetujui', classes: 'bg-green-100 text-green-800' };
+      case 'Ditolak':
         return { text: 'Ditolak', classes: 'bg-red-100 text-red-800' };
       default:
         return { text: status, classes: 'bg-gray-100 text-gray-800' };
@@ -81,7 +77,7 @@ const ConsumableRequestList: React.FC = () => {
 
   return (
     <div className="w-full max-w-4xl mx-auto">
-      <h3 className="text-2xl font-semibold mb-4">Permintaan Barang Habis Pakai Anda</h3>
+      <h3 className="text-2xl font-semibold mb-4">Permintaan Pengembalian Barang Anda</h3>
       {requests && requests.length > 0 ? (
         <Table>
           <TableHeader>
@@ -90,7 +86,7 @@ const ConsumableRequestList: React.FC = () => {
               <TableHead>Kuantitas</TableHead>
               <TableHead>Tanggal Permintaan</TableHead>
               <TableHead>Status</TableHead>
-              {/* <TableHead>Catatan Admin</TableHead> -- Removed as requested */}
+              <TableHead>Catatan Admin</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -106,17 +102,17 @@ const ConsumableRequestList: React.FC = () => {
                       {statusDisplay.text}
                     </span>
                   </TableCell>
-                  {/* <TableCell>{request.admin_notes || '-'}</TableCell> -- Removed as requested */}
+                  <TableCell>{request.admin_notes || '-'}</TableCell>
                 </TableRow>
               );
             })}
           </TableBody>
         </Table>
       ) : (
-        <p className="text-center text-gray-500">Anda belum mengajukan permintaan barang habis pakai.</p>
+        <p className="text-center text-gray-500">Anda belum mengajukan permintaan pengembalian barang.</p>
       )}
     </div>
   );
 };
 
-export default ConsumableRequestList;
+export default ReturnRequestList;
