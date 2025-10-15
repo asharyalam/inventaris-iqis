@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface InventorySummary {
   totalItems: number;
+  pendingReturnRequests: number; // Add pending return requests count
 }
 
 const fetchInventorySummary = async (): Promise<InventorySummary> => {
@@ -21,8 +22,19 @@ const fetchInventorySummary = async (): Promise<InventorySummary> => {
     throw new Error(`Error fetching total items: ${itemsError.message}`);
   }
 
+  // Fetch total number of pending return requests
+  const { count: pendingRequestsCount, error: requestsError } = await supabase
+    .from('return_requests')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'Pending');
+
+  if (requestsError) {
+    throw new Error(`Error fetching pending return requests: ${requestsError.message}`);
+  }
+
   return {
     totalItems: totalItemsCount || 0,
+    pendingReturnRequests: pendingRequestsCount || 0,
   };
 };
 
@@ -46,7 +58,7 @@ const AdminDashboard: React.FC = () => {
       ) : summaryError ? (
         <div className="text-center text-red-500">Error: {summaryError.message}</div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-1 gap-4 w-full"> {/* Changed to 1 column */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full"> {/* Changed to 2 columns for summary cards */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Barang</CardTitle>
@@ -67,6 +79,31 @@ const AdminDashboard: React.FC = () => {
               <div className="text-2xl font-bold">{summary?.totalItems}</div>
               <p className="text-xs text-muted-foreground">
                 Jumlah total item unik dalam inventaris.
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Permintaan Pengembalian Menunggu</CardTitle>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                className="h-4 w-4 text-muted-foreground"
+              >
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{summary?.pendingReturnRequests}</div>
+              <p className="text-xs text-muted-foreground">
+                Jumlah permintaan pengembalian yang menunggu persetujuan.
               </p>
             </CardContent>
           </Card>
