@@ -64,16 +64,16 @@ const BorrowRequestsAdminPage: React.FC = () => {
     queryFn: fetchAllBorrowRequests,
   });
 
-  const handleAction = async (actionType: 'approveHeadmaster' | 'reject' | 'handover') => {
+  const handleAction = async (actionType: 'approve' | 'reject' | 'handover') => {
     if (!selectedRequest || !user) return;
 
     let newStatus: string;
     let successMessage: string;
     let shouldDecrementQuantity = false;
 
-    if (actionType === 'approveHeadmaster') {
-      newStatus = 'Disetujui Kepala Sekolah';
-      successMessage = "Permintaan peminjaman berhasil disetujui oleh Kepala Sekolah!";
+    if (actionType === 'approve') {
+      newStatus = 'Disetujui';
+      successMessage = "Permintaan peminjaman berhasil disetujui!";
     } else if (actionType === 'reject') {
       newStatus = 'Ditolak';
       successMessage = "Permintaan peminjaman berhasil ditolak!";
@@ -155,8 +155,9 @@ const BorrowRequestsAdminPage: React.FC = () => {
     switch (status) {
       case 'Pending':
         return { text: 'Pending', classes: 'bg-yellow-100 text-yellow-800' };
-      case 'Disetujui Kepala Sekolah':
-        return { text: 'Disetujui Kepala Sekolah', classes: 'bg-blue-100 text-blue-800' };
+      case 'Disetujui Kepala Sekolah': // Old status, will be replaced by 'Disetujui'
+      case 'Disetujui':
+        return { text: 'Disetujui', classes: 'bg-blue-100 text-blue-800' };
       case 'Diproses':
         return { text: 'Diproses', classes: 'bg-green-100 text-green-800' };
       case 'Ditolak':
@@ -205,15 +206,16 @@ const BorrowRequestsAdminPage: React.FC = () => {
                         Tinjau
                       </Button>
                     )}
-                    {isAdmin && request.status === 'Disetujui Kepala Sekolah' && (
-                      <>
-                        <Button variant="outline" size="sm" onClick={() => handleAction('handover')}>
-                          Serahkan Barang
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
-                          Tinjau
-                        </Button>
-                      </>
+                    {isAdmin && request.status === 'Disetujui' && (
+                      <Button variant="outline" size="sm" onClick={() => handleAction('handover')}>
+                        Serahkan
+                      </Button>
+                    )}
+                    {/* Admin can still review (and reject) if needed, but 'Serahkan' is the primary action */}
+                    {(isAdmin && request.status === 'Disetujui') && (
+                      <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
+                        Tinjau
+                      </Button>
                     )}
                   </TableCell>
                 </TableRow>
@@ -267,7 +269,7 @@ const BorrowRequestsAdminPage: React.FC = () => {
           <DialogFooter>
             <Button variant="destructive" onClick={() => handleAction('reject')}>Tolak</Button>
             {isHeadmaster && selectedRequest?.status === 'Pending' && (
-              <Button onClick={() => handleAction('approveHeadmaster')}>Setujui</Button>
+              <Button onClick={() => handleAction('approve')}>Setujui</Button>
             )}
             {/* Admin tidak memiliki tombol 'Setujui' di dialog, hanya 'Tolak' atau tindakan langsung 'Serahkan Barang' */}
           </DialogFooter>

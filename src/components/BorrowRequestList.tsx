@@ -15,7 +15,7 @@ interface BorrowRequest {
   quantity: number;
   request_date: string;
   due_date: string;
-  borrow_start_date: string; // Add borrow_start_date
+  borrow_start_date: string;
   status: string;
   admin_notes: string | null;
   items: { name: string };
@@ -70,8 +70,9 @@ const BorrowRequestList: React.FC = () => {
     switch (status) {
       case 'Pending':
         return { text: 'Pending', classes: 'bg-yellow-100 text-yellow-800' };
-      case 'Disetujui Kepala Sekolah':
-        return { text: 'Disetujui Kepala Sekolah', classes: 'bg-blue-100 text-blue-800' };
+      case 'Disetujui Kepala Sekolah': // Old status, will be replaced by 'Disetujui'
+      case 'Disetujui':
+        return { text: 'Disetujui', classes: 'bg-blue-100 text-blue-800' };
       case 'Diproses':
         return { text: 'Diproses', classes: 'bg-green-100 text-green-800' };
       case 'Ditolak':
