@@ -101,9 +101,12 @@ const ReturnRequestsAdminPage: React.FC = () => {
             queryClient.invalidateQueries({ queryKey: ['items'] });
             queryClient.invalidateQueries({ queryKey: ['inventorySummary'] });
             queryClient.invalidateQueries({ queryKey: ['availableItemsForBorrow'] }); // Invalidate for borrow form
+            queryClient.invalidateQueries({ queryKey: ['allItems'] }); // Invalidate for monitoring page
           }
         }
       }
+      queryClient.invalidateQueries({ queryKey: ['returnRequests', selectedRequest.user_id] });
+      queryClient.invalidateQueries({ queryKey: ['allTransactions'] }); // Invalidate for monitoring page
       refetch();
       setIsDialogOpen(false);
       setSelectedRequest(null);
@@ -127,7 +130,8 @@ const ReturnRequestsAdminPage: React.FC = () => {
 
   const getStatusDisplay = (status: string) => {
     switch (status) {
-      case 'Pending':
+      case 'Pending': // Keep for backward compatibility if old data exists
+      case 'Menunggu Persetujuan':
         return { text: 'Menunggu Persetujuan', classes: 'bg-yellow-100 text-yellow-800' };
       case 'Disetujui':
         return { text: 'Disetujui', classes: 'bg-green-100 text-green-800' };
@@ -170,7 +174,7 @@ const ReturnRequestsAdminPage: React.FC = () => {
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
-                    {request.status === 'Pending' && (
+                    {request.status === 'Menunggu Persetujuan' && (
                       <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
                         Tinjau
                       </Button>

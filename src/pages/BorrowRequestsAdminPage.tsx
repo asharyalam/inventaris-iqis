@@ -178,7 +178,8 @@ const BorrowRequestsAdminPage: React.FC = () => {
 
   const getStatusDisplay = (status: string) => {
     switch (status) {
-      case 'Pending':
+      case 'Pending': // Keep for backward compatibility if old data exists
+      case 'Menunggu Persetujuan':
         return { text: 'Menunggu Persetujuan', classes: 'bg-yellow-100 text-yellow-800' };
       case 'Disetujui':
         return { text: 'Disetujui', classes: 'bg-blue-100 text-blue-800' };
@@ -227,7 +228,7 @@ const BorrowRequestsAdminPage: React.FC = () => {
                     </span>
                   </TableCell>
                   <TableCell className="text-right space-x-2">
-                    {isHeadmaster && request.status === 'Pending' && (
+                    {isHeadmaster && request.status === 'Menunggu Persetujuan' && (
                       <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
                         Tinjau
                       </Button>
@@ -242,7 +243,7 @@ const BorrowRequestsAdminPage: React.FC = () => {
                         Proses Pengembalian
                       </Button>
                     )}
-                    {((isHeadmaster && request.status !== 'Pending') || (isAdmin && request.status !== 'Disetujui' && request.status !== 'Diproses')) && (
+                    {((isHeadmaster && request.status !== 'Menunggu Persetujuan') || (isAdmin && request.status !== 'Disetujui' && request.status !== 'Diproses')) && (
                       <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
                         Lihat Detail
                       </Button>
@@ -298,13 +299,13 @@ const BorrowRequestsAdminPage: React.FC = () => {
                   onChange={(e) => setAdminNotes(e.target.value)}
                   className="col-span-3"
                   placeholder="Tambahkan catatan admin..."
-                  readOnly={selectedRequest.status !== 'Pending' && selectedRequest.status !== 'Disetujui' && selectedRequest.status !== 'Diproses'}
+                  readOnly={selectedRequest.status !== 'Menunggu Persetujuan' && selectedRequest.status !== 'Disetujui' && selectedRequest.status !== 'Diproses'}
                 />
               </div>
             </div>
           )}
           <DialogFooter>
-            {isHeadmaster && selectedRequest?.status === 'Pending' && (
+            {isHeadmaster && selectedRequest?.status === 'Menunggu Persetujuan' && (
               <>
                 <Button variant="destructive" onClick={() => handleAction('reject')}>Tolak</Button>
                 <Button onClick={() => handleAction('approve')}>Setujui</Button>
