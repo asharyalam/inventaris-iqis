@@ -11,7 +11,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import UserManagement from "./pages/UserManagement";
 import AdminReturnRequests from "./pages/AdminReturnRequests";
 import AdminBorrowRequests from "./pages/AdminBorrowRequests";
-import ItemManagement from "./pages/ItemManagement"; // Import ItemManagement
+import ItemManagement from "./pages/ItemManagement";
+import AdminPageLayout from "./components/AdminPageLayout"; // Import the new layout
 
 const queryClient = new QueryClient();
 
@@ -26,10 +27,14 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route element={<ProtectedRoute />}>
               <Route path="/" element={<Index />} />
-              <Route path="/admin/users" element={<UserManagement />} />
-              <Route path="/admin/return-requests" element={<AdminReturnRequests />} />
-              <Route path="/admin/borrow-requests" element={<AdminBorrowRequests />} />
-              <Route path="/admin/items" element={<ItemManagement />} /> {/* Add Item Management route */}
+              
+              {/* Admin routes wrapped by AdminPageLayout */}
+              <Route element={<AdminPageLayout />}>
+                <Route path="/admin/users" element={<UserManagement />} />
+                <Route path="/admin/return-requests" element={<AdminReturnRequests />} />
+                <Route path="/admin/borrow-requests" element={<AdminBorrowRequests />} />
+                <Route path="/admin/items" element={<ItemManagement />} />
+              </Route>
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             </Route>
             <Route path="*" element={<NotFound />} />
