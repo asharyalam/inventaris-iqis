@@ -3,7 +3,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Package, History, PlusCircle } from 'lucide-react'; // Menghapus Handshake dan BarChart3
+import { Users, Package, Handshake, History, PlusCircle } from 'lucide-react';
 import { useSession } from '@/components/SessionContextProvider';
 import HeadmasterDashboard from './HeadmasterDashboard';
 
@@ -51,17 +51,41 @@ const AdminDashboard: React.FC = () => {
           </Card>
         </Link>
 
-        {/* Kartu untuk Permintaan Peminjaman, Habis Pakai, dan Pemantauan & Pelaporan dihapus dari Admin Dashboard */}
+        <Link to="/admin/borrow-requests">
+          <Card className="hover:shadow-lg transition-shadow duration-200">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Manajemen Peminjaman</CardTitle> {/* Diperbarui */}
+              <Handshake className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold">Tinjau</p>
+              <p className="text-xs text-muted-foreground">Kelola permintaan peminjaman barang.</p>
+            </CardContent>
+          </Card>
+        </Link>
 
         <Link to="/admin/return-requests">
           <Card className="hover:shadow-lg transition-shadow duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Manajemen Persetujuan Pengembalian</CardTitle>
+              <CardTitle className="text-sm font-medium">Manajemen Pengembalian</CardTitle> {/* Diperbarui */}
               <History className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <p className="text-2xl font-bold">Tinjau</p>
               <p className="text-xs text-muted-foreground">Kelola permintaan pengembalian barang.</p>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link to="/admin/consumable-requests">
+          <Card className="hover:shadow-lg transition-shadow duration-200">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Manajemen Permintaan Barang Habis Pakai</CardTitle> {/* Baru */}
+              <Package className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold">Tinjau</p>
+              <p className="text-xs text-muted-foreground">Kelola permintaan barang habis pakai.</p>
             </CardContent>
           </Card>
         </Link>

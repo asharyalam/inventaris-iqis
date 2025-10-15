@@ -11,7 +11,7 @@ import { id } from 'date-fns/locale';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input"; // Import Input component
+import { Input } from "@/components/ui/input";
 import { useSession } from '@/components/SessionContextProvider';
 
 interface ReturnRequest {
@@ -66,7 +66,7 @@ const ReturnRequestsAdminPage: React.FC = () => {
     const { error: updateError } = await supabase
       .from('return_requests')
       .update({
-        status: status,
+        status: status === 'Approved' ? 'Disetujui' : 'Ditolak', // Update status to Indonesian
         admin_notes: adminNotes,
         approved_by: user.id,
         approval_date: new Date().toISOString(),
@@ -125,6 +125,19 @@ const ReturnRequestsAdminPage: React.FC = () => {
     return <div className="text-center text-red-500">Error: {error.message}</div>;
   }
 
+  const getStatusDisplay = (status: string) => {
+    switch (status) {
+      case 'Pending':
+        return { text: 'Pending', classes: 'bg-yellow-100 text-yellow-800' };
+      case 'Disetujui':
+        return { text: 'Disetujui', classes: 'bg-green-100 text-green-800' };
+      case 'Ditolak':
+        return { text: 'Ditolak', classes: 'bg-red-100 text-red-800' };
+      default:
+        return { text: status, classes: 'bg-gray-100 text-gray-800' };
+    }
+  };
+
   return (
     <div className="w-full max-w-6xl mx-auto p-4">
       <h2 className="text-3xl font-bold mb-6 text-center">Manajemen Permintaan Pengembalian</h2>
@@ -142,31 +155,30 @@ const ReturnRequestsAdminPage: React.FC = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {requests.map((request) => (
-              <TableRow key={request.id}>
-                <TableCell className="font-medium">{request.items?.name || 'N/A'}</TableCell>
-                <TableCell>{`${request.profiles?.first_name || ''} ${request.profiles?.last_name || ''}`.trim() || 'N/A'}</TableCell>
-                <TableCell>{request.profiles?.instansi || '-'}</TableCell>
-                <TableCell>{request.quantity}</TableCell>
-                <TableCell>{format(new Date(request.request_date), 'dd MMM yyyy HH:mm', { locale: id })}</TableCell>
-                <TableCell>
-                  <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                    request.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                    request.status === 'Approved' ? 'bg-green-100 text-green-800' :
-                    'bg-red-100 text-red-800'
-                  }`}>
-                    {request.status}
-                  </span>
-                </TableCell>
-                <TableCell className="text-right">
-                  {request.status === 'Pending' && (
-                    <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
-                      Tinjau
-                    </Button>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
+            {requests.map((request) => {
+              const statusDisplay = getStatusDisplay(request.status);
+              return (
+                <TableRow key={request.id}>
+                  <TableCell className="font-medium">{request.items?.name || 'N/A'}</TableCell>
+                  <TableCell>{`${request.profiles?.first_name || ''} ${request.profiles?.last_name || ''}`.trim() || 'N/A'}</TableCell>
+                  <TableCell>{request.profiles?.instansi || '-'}</TableCell>
+                  <TableCell>{request.quantity}</TableCell>
+                  <TableCell>{format(new Date(request.request_date), 'dd MMM yyyy HH:mm', { locale: id })}</TableCell>
+                  <TableCell>
+                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusDisplay.classes}`}>
+                      {statusDisplay.text}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {request.status === 'Pending' && (
+                      <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
+                        Tinjau
+                      </Button>
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       ) : (
