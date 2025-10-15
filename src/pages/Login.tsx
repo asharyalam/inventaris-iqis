@@ -59,7 +59,6 @@ const Login = () => {
                 social_auth_text: 'Atau masuk dengan',
                 link_text: 'Sudah punya akun? Masuk',
                 forgotten_password_text: 'Lupa kata sandi?',
-                // confirmation_text: 'Periksa email Anda untuk tautan konfirmasi', // Dihapus
               },
               sign_up: {
                 email_label: 'Email Anda',
@@ -69,14 +68,12 @@ const Login = () => {
                 button_label: 'Daftar',
                 social_auth_text: 'Atau daftar dengan',
                 link_text: 'Belum punya akun? Daftar',
-                // confirmation_text: 'Periksa email Anda untuk tautan konfirmasi', // Dihapus
               },
               forgotten_password: {
                 email_label: 'Email Anda',
                 email_input_placeholder: 'Masukkan email Anda',
                 button_label: 'Kirim instruksi reset',
                 link_text: 'Lupa kata sandi?',
-                // confirmation_text: 'Periksa email Anda untuk tautan reset kata sandi', // Dihapus
               },
               update_password: {
                 password_label: 'Kata Sandi Baru',

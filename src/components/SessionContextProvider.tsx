@@ -18,13 +18,16 @@ export const SessionContextProvider = ({ children }: { children: React.ReactNode
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    console.log("SessionContextProvider: Initializing session check.");
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log("SessionContextProvider: Initial session data:", session);
       setSession(session);
       setUser(session?.user || null);
       setIsLoading(false);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log("SessionContextProvider: Auth state changed. Event:", _event, "Session:", session);
       setSession(session);
       setUser(session?.user || null);
       setIsLoading(false);
