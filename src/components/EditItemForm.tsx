@@ -17,14 +17,12 @@ interface Item {
   name: string;
   description: string | null;
   quantity: number;
-  price: number;
 }
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Nama barang minimal 2 karakter." }),
   description: z.string().optional(),
   quantity: z.coerce.number().min(0, { message: "Kuantitas tidak boleh negatif." }),
-  price: z.coerce.number().min(0, { message: "Harga tidak boleh negatif." }),
 });
 
 interface EditItemFormProps {
@@ -41,7 +39,6 @@ const EditItemForm: React.FC<EditItemFormProps> = ({ item, onSuccess }) => {
       name: item.name,
       description: item.description || "",
       quantity: item.quantity,
-      price: item.price,
     },
   });
 
@@ -52,7 +49,6 @@ const EditItemForm: React.FC<EditItemFormProps> = ({ item, onSuccess }) => {
         name: values.name,
         description: values.description,
         quantity: values.quantity,
-        price: values.price,
       })
       .eq('id', item.id);
 
@@ -102,19 +98,6 @@ const EditItemForm: React.FC<EditItemFormProps> = ({ item, onSuccess }) => {
               <FormLabel>Kuantitas</FormLabel>
               <FormControl>
                 <Input type="number" placeholder="0" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="price"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Harga</FormLabel>
-              <FormControl>
-                <Input type="number" step="0.01" placeholder="0.00" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

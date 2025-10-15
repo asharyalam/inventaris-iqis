@@ -17,7 +17,6 @@ interface Item {
   name: string;
   description: string | null;
   quantity: number;
-  price: number;
   created_at: string;
 }
 
@@ -128,7 +127,6 @@ const ItemList: React.FC = () => {
                 <TableHead>Nama</TableHead>
                 <TableHead>Deskripsi</TableHead>
                 <TableHead>Kuantitas</TableHead>
-                <TableHead>Harga</TableHead>
                 {isAdmin && <TableHead className="text-right">Aksi</TableHead>}
               </TableRow>
             </TableHeader>
@@ -138,7 +136,6 @@ const ItemList: React.FC = () => {
                   <TableCell className="font-medium">{item.name}</TableCell>
                   <TableCell>{item.description || '-'}</TableCell>
                   <TableCell>{item.quantity}</TableCell>
-                  <TableCell>{item.price ? `Rp${item.price.toLocaleString('id-ID')}` : 'Rp0'}</TableCell>
                   {isAdmin && (
                     <TableCell className="text-right space-x-2">
                       <Button variant="outline" size="sm" onClick={() => handleEditClick(item)}>

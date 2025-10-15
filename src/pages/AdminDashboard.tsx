@@ -9,7 +9,6 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface InventorySummary {
   totalItems: number;
-  totalValue: number;
 }
 
 const fetchInventorySummary = async (): Promise<InventorySummary> => {
@@ -22,20 +21,8 @@ const fetchInventorySummary = async (): Promise<InventorySummary> => {
     throw new Error(`Error fetching total items: ${itemsError.message}`);
   }
 
-  // Fetch total value of inventory
-  const { data: itemsData, error: valueError } = await supabase
-    .from('items')
-    .select('quantity, price');
-
-  if (valueError) {
-    throw new Error(`Error fetching item values: ${valueError.message}`);
-  }
-
-  const totalValue = itemsData.reduce((sum, item) => sum + (item.quantity * item.price), 0);
-
   return {
     totalItems: totalItemsCount || 0,
-    totalValue: totalValue,
   };
 };
 
@@ -59,7 +46,7 @@ const AdminDashboard: React.FC = () => {
       ) : summaryError ? (
         <div className="text-center text-red-500">Error: {summaryError.message}</div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-4 w-full"> {/* Changed to 1 column */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Barang</CardTitle>
@@ -80,31 +67,6 @@ const AdminDashboard: React.FC = () => {
               <div className="text-2xl font-bold">{summary?.totalItems}</div>
               <p className="text-xs text-muted-foreground">
                 Jumlah total item unik dalam inventaris.
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Nilai Inventaris</CardTitle>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                className="h-4 w-4 text-muted-foreground"
-              >
-                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-              </svg>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {summary?.totalValue.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Total nilai semua barang dalam inventaris.
               </p>
             </CardContent>
           </Card>

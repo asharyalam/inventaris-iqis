@@ -17,7 +17,6 @@ const formSchema = z.object({
   name: z.string().min(2, { message: "Nama barang minimal 2 karakter." }),
   description: z.string().optional(),
   quantity: z.coerce.number().min(0, { message: "Kuantitas tidak boleh negatif." }),
-  price: z.coerce.number().min(0, { message: "Harga tidak boleh negatif." }),
 });
 
 const AddItemForm: React.FC = () => {
@@ -30,7 +29,6 @@ const AddItemForm: React.FC = () => {
       name: "",
       description: "",
       quantity: 0,
-      price: 0,
     },
   });
 
@@ -46,7 +44,6 @@ const AddItemForm: React.FC = () => {
         name: values.name,
         description: values.description,
         quantity: values.quantity,
-        price: values.price,
         user_id: user.id,
       })
       .select();
@@ -99,19 +96,6 @@ const AddItemForm: React.FC = () => {
                 <FormLabel>Kuantitas</FormLabel>
                 <FormControl>
                   <Input type="number" placeholder="0" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="price"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Harga</FormLabel>
-                <FormControl>
-                  <Input type="number" step="0.01" placeholder="0.00" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
