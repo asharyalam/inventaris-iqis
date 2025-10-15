@@ -3,10 +3,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, LayoutDashboard, Users } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { LayoutDashboard, Users } from 'lucide-react';
 import { useSession } from './SessionContextProvider';
 
 interface NavLinkProps {
@@ -31,7 +28,7 @@ const NavLink: React.FC<NavLinkProps> = ({ to, icon, label, isActive, onClick })
   </Link>
 );
 
-const SidebarContent: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
+const SidebarContent: React.FC = () => {
   const location = useLocation();
   const { userProfile } = useSession();
   const isAdmin = userProfile?.role === 'Admin';
@@ -43,7 +40,6 @@ const SidebarContent: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
         icon={<LayoutDashboard className="h-4 w-4" />}
         label="Dashboard"
         isActive={location.pathname === '/'}
-        onClick={onClose}
       />
       {isAdmin && (
         <NavLink
@@ -51,7 +47,6 @@ const SidebarContent: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
           icon={<Users className="h-4 w-4" />}
           label="Manajemen Pengguna"
           isActive={location.pathname === '/admin/users'}
-          onClick={onClose}
         />
       )}
     </nav>
@@ -59,37 +54,15 @@ const SidebarContent: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
 };
 
 const Sidebar: React.FC = () => {
-  const isMobile = useIsMobile();
-  const [isOpen, setIsOpen] = React.useState(false);
-
-  if (isMobile) {
-    return (
-      <Sheet open={isOpen} onOpenChange={setIsOpen}>
-        <SheetTrigger asChild>
-          <Button variant="outline" size="icon" className="shrink-0 md:hidden">
-            <Menu className="h-5 w-5" />
-            <span className="sr-only">Toggle navigation menu</span>
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="flex flex-col">
-          <h1 className="text-2xl font-bold text-gray-900 p-4">IQIS Inventaris</h1>
-          <SidebarContent onClose={() => setIsOpen(false)} />
-        </SheetContent>
-      </Sheet>
-    );
-  }
-
   return (
-    <div className="hidden border-r bg-muted/40 md:block">
-      <div className="flex h-full max-h-screen flex-col gap-2">
-        <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
-          <Link to="/" className="flex items-center gap-2 font-semibold">
-            <span className="text-lg">IQIS Inventaris</span>
-          </Link>
-        </div>
-        <div className="flex-1">
-          <SidebarContent />
-        </div>
+    <div className="border-r bg-muted/40 flex flex-col h-full max-h-screen">
+      <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+        <Link to="/" className="flex items-center gap-2 font-semibold">
+          <span className="text-lg">IQIS Inventaris</span>
+        </Link>
+      </div>
+      <div className="flex-1 py-4">
+        <SidebarContent />
       </div>
     </div>
   );

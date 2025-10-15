@@ -27,12 +27,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ firstName, instansi, role, chil
   };
 
   return (
-    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+    <div className="grid min-h-screen w-full grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]"> {/* Sidebar always visible */}
       <Sidebar /> {/* Sidebar component */}
       <div className="flex flex-col">
         <header className="flex h-14 items-center gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6 justify-between">
           <div className="flex items-center space-x-4">
-            {/* Mobile sidebar trigger will be handled by the Sidebar component itself */}
             <span className="text-lg text-gray-700">Selamat Datang, {firstName} ({role})</span>
           </div>
           <Button onClick={handleLogout} variant="destructive">
