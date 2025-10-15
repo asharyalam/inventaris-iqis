@@ -10,13 +10,14 @@ import { showError } from '@/utils/toast';
 import { useSession } from './SessionContextProvider';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import EditItemForm from './EditItemForm';
-import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationLink, PaginationNext, PaginationEllipsis } from "@/components/ui/pagination"; // Import Pagination components
+import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationLink, PaginationNext, PaginationEllipsis } from "@/components/ui/pagination";
 
 interface Item {
   id: string;
   name: string;
   description: string | null;
   quantity: number;
+  type: 'consumable' | 'returnable'; // Add type to Item interface
   created_at: string;
 }
 
@@ -25,7 +26,6 @@ interface PaginatedItems {
   totalCount: number;
 }
 
-// Modifikasi fetchItems untuk menerima searchTerm, page, dan pageSize
 const fetchItems = async (searchTerm: string = '', page: number, pageSize: number): Promise<PaginatedItems> => {
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
@@ -50,11 +50,11 @@ const fetchItems = async (searchTerm: string = '', page: number, pageSize: numbe
 const ItemList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10; // Jumlah item per halaman
+  const itemsPerPage = 10;
 
   const { data, isLoading, error, refetch } = useQuery<PaginatedItems, Error>({
-    queryKey: ['items', searchTerm, currentPage, itemsPerPage], // Tambahkan currentPage dan itemsPerPage ke queryKey
-    queryFn: () => fetchItems(searchTerm, currentPage, itemsPerPage), // Panggil fetchItems dengan parameter paginasi
+    queryKey: ['items', searchTerm, currentPage, itemsPerPage],
+    queryFn: () => fetchItems(searchTerm, currentPage, itemsPerPage),
   });
 
   const items = data?.items || [];
@@ -76,6 +76,9 @@ const ItemList: React.FC = () => {
       showError(`Gagal menghapus barang: ${error.message}`);
     } else {
       refetch();
+      // Invalidate inventory summary as well
+      queryClient.invalidateQueries({ queryKey: ['inventorySummary'] });
+      queryClient.invalidateQueries({ queryKey: ['availableItems'] });
     }
   };
 
@@ -114,7 +117,7 @@ const ItemList: React.FC = () => {
           value={searchTerm}
           onChange={(e) => {
             setSearchTerm(e.target.value);
-            setCurrentPage(1); // Reset ke halaman 1 saat mencari
+            setCurrentPage(1);
           }}
           className="w-full"
         />
@@ -127,6 +130,7 @@ const ItemList: React.FC = () => {
                 <TableHead>Nama</TableHead>
                 <TableHead>Deskripsi</TableHead>
                 <TableHead>Kuantitas</TableHead>
+                <TableHead>Tipe</TableHead> {/* New TableHead for Type */}
                 {isAdmin && <TableHead className="text-right">Aksi</TableHead>}
               </TableRow>
             </TableHeader>
@@ -136,6 +140,7 @@ const ItemList: React.FC = () => {
                   <TableCell className="font-medium">{item.name}</TableCell>
                   <TableCell>{item.description || '-'}</TableCell>
                   <TableCell>{item.quantity}</TableCell>
+                  <TableCell>{item.type === 'consumable' ? 'Habis Pakai' : 'Harus Dikembalikan'}</TableCell> {/* Display item type */}
                   {isAdmin && (
                     <TableCell className="text-right space-x-2">
                       <Button variant="outline" size="sm" onClick={() => handleEditClick(item)}>

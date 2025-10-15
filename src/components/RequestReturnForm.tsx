@@ -17,6 +17,7 @@ interface Item {
   id: string;
   name: string;
   quantity: number;
+  type: 'consumable' | 'returnable'; // Add type to Item interface
 }
 
 const formSchema = z.object({
@@ -27,8 +28,9 @@ const formSchema = z.object({
 const fetchAvailableItems = async (): Promise<Item[]> => {
   const { data, error } = await supabase
     .from('items')
-    .select('id, name, quantity')
-    .gt('quantity', 0); // Hanya tampilkan barang yang tersedia
+    .select('id, name, quantity, type') // Select type as well
+    .eq('type', 'returnable') // Filter for 'returnable' items only
+    .gt('quantity', 0);
 
   if (error) {
     throw new Error(error.message);
@@ -73,7 +75,7 @@ const RequestReturnForm: React.FC = () => {
           item_id: values.itemId,
           user_id: user.id,
           quantity: values.quantity,
-          status: 'Pending', // Default status
+          status: 'Pending',
         });
 
       if (error) {
@@ -83,8 +85,8 @@ const RequestReturnForm: React.FC = () => {
     onSuccess: () => {
       showSuccess("Permintaan pengembalian berhasil diajukan!");
       form.reset();
-      queryClient.invalidateQueries({ queryKey: ['availableItems'] }); // Refresh item list
-      queryClient.invalidateQueries({ queryKey: ['userReturnRequests'] }); // Invalidate user's return requests
+      queryClient.invalidateQueries({ queryKey: ['availableItems'] });
+      queryClient.invalidateQueries({ queryKey: ['userReturnRequests'] });
     },
     onError: (err) => {
       showError(`Gagal mengajukan permintaan: ${err.message}`);

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // Import Select components
 import { supabase } from '@/integrations/supabase/client';
 import { showSuccess, showError } from '@/utils/toast';
 import { useQueryClient } from '@tanstack/react-query';
@@ -17,11 +18,12 @@ const formSchema = z.object({
   name: z.string().min(2, { message: "Nama barang minimal 2 karakter." }),
   description: z.string().optional(),
   quantity: z.coerce.number().min(0, { message: "Kuantitas tidak boleh negatif." }),
+  type: z.enum(['consumable', 'returnable'], { message: "Pilih tipe barang yang valid." }), // New field for item type
 });
 
 const AddItemForm: React.FC = () => {
   const queryClient = useQueryClient();
-  const { user, userProfile } = useSession(); // Dapatkan userProfile
+  const { user, userProfile } = useSession();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -29,11 +31,12 @@ const AddItemForm: React.FC = () => {
       name: "",
       description: "",
       quantity: 0,
+      type: "returnable", // Default to 'returnable'
     },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    if (!user || userProfile?.role !== 'Admin') { // Periksa peran admin
+    if (!user || userProfile?.role !== 'Admin') {
       showError("Anda tidak memiliki izin untuk menambahkan barang.");
       return;
     }
@@ -44,6 +47,7 @@ const AddItemForm: React.FC = () => {
         name: values.name,
         description: values.description,
         quantity: values.quantity,
+        type: values.type, // Include item type
         user_id: user.id,
       })
       .select();
@@ -53,7 +57,9 @@ const AddItemForm: React.FC = () => {
     } else {
       showSuccess("Barang berhasil ditambahkan!");
       form.reset();
-      queryClient.invalidateQueries({ queryKey: ['items'] }); // Invalidate and refetch items
+      queryClient.invalidateQueries({ queryKey: ['items'] });
+      queryClient.invalidateQueries({ queryKey: ['inventorySummary'] }); // Invalidate summary to update total items
+      queryClient.invalidateQueries({ queryKey: ['availableItems'] }); // Invalidate available items for return form
     }
   };
 
@@ -97,6 +103,27 @@ const AddItemForm: React.FC = () => {
                 <FormControl>
                   <Input type="number" placeholder="0" {...field} />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tipe Barang</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Pilih tipe barang" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="returnable">Harus Dikembalikan</SelectItem>
+                    <SelectItem value="consumable">Habis Pakai</SelectItem>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
