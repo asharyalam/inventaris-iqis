@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { supabase } => '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,9 +18,9 @@ interface Request {
   type: 'Peminjaman' | 'Pengembalian' | 'Habis Pakai';
   items: { name: string };
   profiles: { first_name: string; last_name: string; instansi: string };
-  due_date?: string;
-  borrow_start_date?: string;
-  returned_date?: string;
+  due_date?: string; // Only for borrow requests
+  borrow_start_date?: string; // Add borrow_start_date for borrow requests
+  returned_date?: string; // New field for borrow requests
 }
 
 interface Item {
