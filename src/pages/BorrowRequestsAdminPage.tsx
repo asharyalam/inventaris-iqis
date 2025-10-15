@@ -146,10 +146,12 @@ const BorrowRequestsAdminPage: React.FC = () => {
             queryClient.invalidateQueries({ queryKey: ['items'] });
             queryClient.invalidateQueries({ queryKey: ['inventorySummary'] });
             queryClient.invalidateQueries({ queryKey: ['availableItemsForBorrow'] });
+            queryClient.invalidateQueries({ queryKey: ['allItems'] }); // Invalidate for monitoring page
           }
         }
       }
       queryClient.invalidateQueries({ queryKey: ['borrowRequests', selectedRequest.user_id] });
+      queryClient.invalidateQueries({ queryKey: ['allTransactions'] }); // Invalidate for monitoring page
       refetch();
       setIsDialogOpen(false);
       setSelectedRequest(null);
@@ -193,7 +195,7 @@ const BorrowRequestsAdminPage: React.FC = () => {
 
   return (
     <div className="w-full max-w-6xl mx-auto p-4">
-      <h2 className="text-3xl font-bold mb-6 text-center">Manajemen Peminjaman Barang</h2> {/* Diperbarui */}
+      <h2 className="text-3xl font-bold mb-6 text-center">Manajemen Peminjaman Barang</h2>
       {requests && requests.length > 0 ? (
         <Table>
           <TableHeader>
@@ -225,7 +227,7 @@ const BorrowRequestsAdminPage: React.FC = () => {
                     </span>
                   </TableCell>
                   <TableCell className="text-right space-x-2">
-                    {isHeadmaster && request.status === 'Menunggu Persetujuan' && (
+                    {isHeadmaster && request.status === 'Pending' && (
                       <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
                         Tinjau
                       </Button>
@@ -240,7 +242,7 @@ const BorrowRequestsAdminPage: React.FC = () => {
                         Proses Pengembalian
                       </Button>
                     )}
-                    {((isHeadmaster && request.status !== 'Menunggu Persetujuan') || (isAdmin && request.status !== 'Disetujui' && request.status !== 'Diproses')) && (
+                    {((isHeadmaster && request.status !== 'Pending') || (isAdmin && request.status !== 'Disetujui' && request.status !== 'Diproses')) && (
                       <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
                         Lihat Detail
                       </Button>
@@ -296,13 +298,13 @@ const BorrowRequestsAdminPage: React.FC = () => {
                   onChange={(e) => setAdminNotes(e.target.value)}
                   className="col-span-3"
                   placeholder="Tambahkan catatan admin..."
-                  readOnly={selectedRequest.status !== 'Menunggu Persetujuan' && selectedRequest.status !== 'Disetujui' && selectedRequest.status !== 'Diproses'}
+                  readOnly={selectedRequest.status !== 'Pending' && selectedRequest.status !== 'Disetujui' && selectedRequest.status !== 'Diproses'}
                 />
               </div>
             </div>
           )}
           <DialogFooter>
-            {isHeadmaster && selectedRequest?.status === 'Menunggu Persetujuan' && (
+            {isHeadmaster && selectedRequest?.status === 'Pending' && (
               <>
                 <Button variant="destructive" onClick={() => handleAction('reject')}>Tolak</Button>
                 <Button onClick={() => handleAction('approve')}>Setujui</Button>
