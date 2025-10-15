@@ -72,7 +72,9 @@ const UserManagementPage: React.FC = () => {
       showError(`Gagal memperbarui profil pengguna: ${updateError.message}`);
     } else {
       showSuccess("Profil pengguna berhasil diperbarui!");
-      refetch();
+      refetch(); // Muat ulang daftar semua pengguna
+      // Batalkan kueri profil pengguna spesifik untuk memastikan SessionContextProvider mendapatkan peran terbaru
+      queryClient.invalidateQueries({ queryKey: ['userProfile', editingUser.id] });
       setIsDialogOpen(false);
     }
   };
@@ -146,7 +148,7 @@ const UserManagementPage: React.FC = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Admin">Admin</SelectItem>
-                    <SelectItem value="Kepala Sekolah">Kepala Sekolah</SelectItem> {/* Ditambahkan: Opsi Kepala Sekolah */}
+                    <SelectItem value="Kepala Sekolah">Kepala Sekolah</SelectItem>
                     <SelectItem value="Pengguna">Pengguna</SelectItem>
                   </SelectContent>
                 </Select>
