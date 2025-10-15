@@ -13,7 +13,7 @@ import BorrowRequestsPage from "./pages/BorrowRequestsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Unauthorized from "./pages/Unauthorized";
 import { SessionContextProvider } from "./components/SessionContextProvider";
-import ItemList from "./components/ItemList";
+import ItemList from "./pages/ItemList"; // Corrected import path
 import ReturnRequestsAdminPage from "./pages/ReturnRequestsAdminPage";
 import BorrowRequestsAdminPage from "./pages/BorrowRequestsAdminPage";
 import UserManagementPage from "./pages/UserManagementPage";
