@@ -1,8 +1,6 @@
 "use client";
 
 import React from 'react';
-import ItemList from '@/components/ItemList';
-import AddItemForm from '@/components/AddItemForm';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -70,7 +68,7 @@ const AdminDashboard: React.FC = () => {
       ) : summaryError ? (
         <div className="text-center text-red-500">Error: {summaryError.message}</div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full"> {/* Changed to 3 columns for summary cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Barang</CardTitle>
@@ -148,9 +146,6 @@ const AdminDashboard: React.FC = () => {
           </Card>
         </div>
       )}
-
-      <AddItemForm />
-      <ItemList />
     </div>
   );
 };

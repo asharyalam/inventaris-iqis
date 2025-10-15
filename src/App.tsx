@@ -10,7 +10,8 @@ import { SessionContextProvider } from "./components/SessionContextProvider";
 import ProtectedRoute from "./components/ProtectedRoute";
 import UserManagement from "./pages/UserManagement";
 import AdminReturnRequests from "./pages/AdminReturnRequests";
-import AdminBorrowRequests from "./pages/AdminBorrowRequests"; // Import AdminBorrowRequests
+import AdminBorrowRequests from "./pages/AdminBorrowRequests";
+import ItemManagement from "./pages/ItemManagement"; // Import ItemManagement
 
 const queryClient = new QueryClient();
 
@@ -27,7 +28,8 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/admin/users" element={<UserManagement />} />
               <Route path="/admin/return-requests" element={<AdminReturnRequests />} />
-              <Route path="/admin/borrow-requests" element={<AdminBorrowRequests />} /> {/* Add Admin Borrow Requests route */}
+              <Route path="/admin/borrow-requests" element={<AdminBorrowRequests />} />
+              <Route path="/admin/items" element={<ItemManagement />} /> {/* Add Item Management route */}
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             </Route>
             <Route path="*" element={<NotFound />} />
