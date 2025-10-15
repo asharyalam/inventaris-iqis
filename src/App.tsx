@@ -20,6 +20,7 @@ import UserManagementPage from "./pages/UserManagementPage";
 import AddItemForm from "./components/AddItemForm";
 import AppLayout from "./components/AppLayout"; // Import the new AppLayout
 import AdminConsumableRequestsPage from "./pages/AdminConsumableRequestsPage"; // Import new admin consumable requests page
+import MonitoringReportingPage from "./pages/MonitoringReportingPage"; // Import new MonitoringReportingPage
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,7 @@ const App = () => (
                 <Route path="/admin/borrow-requests" element={<BorrowRequestsAdminPage />} />
                 <Route path="/admin/consumable-requests" element={<AdminConsumableRequestsPage />} /> {/* New Admin Consumable Requests Page */}
                 <Route path="/admin/users" element={<UserManagementPage />} />
+                <Route path="/admin/monitoring-reporting" element={<MonitoringReportingPage />} /> {/* New Monitoring & Reporting Page */}
               </Route>
             </Route>
 

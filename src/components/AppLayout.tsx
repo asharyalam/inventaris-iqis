@@ -6,7 +6,7 @@ import { useSession } from '@/components/SessionContextProvider';
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Home, Package, Handshake, History, Users, PlusCircle, LogOut, Menu, User as UserIcon } from 'lucide-react';
+import { Home, Package, Handshake, History, Users, PlusCircle, LogOut, Menu, User as UserIcon, BarChart3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
@@ -30,6 +30,7 @@ const navItems: NavItem[] = [
   { title: "Permintaan Pengembalian (Admin)", href: "/admin/return-requests", icon: History, roles: ["Admin", "Kepala Sekolah"] },
   { title: "Permintaan Habis Pakai (Admin)", href: "/admin/consumable-requests", icon: Package, roles: ["Admin", "Kepala Sekolah"] },
   { title: "Manajemen Pengguna", href: "/admin/users", icon: Users, roles: ["Admin"] },
+  { title: "Pemantauan & Pelaporan", href: "/admin/monitoring-reporting", icon: BarChart3, roles: ["Admin", "Kepala Sekolah"] },
 ];
 
 const SidebarContent: React.FC<{ userRole: string | null; closeSheet?: () => void }> = ({ userRole, closeSheet }) => {

@@ -3,16 +3,22 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Package, History, Handshake, PlusCircle } from 'lucide-react';
+import { Users, Package, History, Handshake, PlusCircle, BarChart3 } from 'lucide-react';
 import { useSession } from '@/components/SessionContextProvider';
+import HeadmasterDashboard from './HeadmasterDashboard'; // Import the new HeadmasterDashboard
 
 const AdminDashboard: React.FC = () => {
-  const { userProfile } = useSession();
+  const { userProfile, isAdmin, isHeadmaster } = useSession();
 
+  if (isHeadmaster && !isAdmin) { // If user is Headmaster but not also an Admin
+    return <HeadmasterDashboard />;
+  }
+
+  // Render Admin Dashboard content for Admin role
   return (
     <div className="flex flex-col items-center justify-start w-full max-w-6xl mx-auto space-y-8">
       <div className="text-center bg-white p-8 rounded-lg shadow-md w-full">
-        <h2 className="text-4xl font-bold mb-4 text-blue-600">Selamat Datang, {userProfile?.role || 'Admin'} {userProfile?.first_name || ''}!</h2>
+        <h2 className="text-4xl font-bold mb-4 text-blue-600">Selamat Datang, Admin {userProfile?.first_name || ''}!</h2>
         <p className="text-xl text-blue-600 mb-6">
           Pilih opsi di bawah untuk mengelola sistem inventaris.
         </p>
@@ -32,20 +38,18 @@ const AdminDashboard: React.FC = () => {
           </Card>
         </Link>
 
-        {userProfile?.role === 'Admin' && ( // Only show "Add Item" for Admin role
-          <Link to="/admin/add-item">
-            <Card className="hover:shadow-lg transition-shadow duration-200">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Tambah Barang Baru</CardTitle>
-                <PlusCircle className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold">Barang</p>
-                <p className="text-xs text-muted-foreground">Tambahkan item baru ke inventaris.</p>
-              </CardContent>
-            </Card>
-          </Link>
-        )}
+        <Link to="/admin/add-item">
+          <Card className="hover:shadow-lg transition-shadow duration-200">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Tambah Barang Baru</CardTitle>
+              <PlusCircle className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold">Barang</p>
+              <p className="text-xs text-muted-foreground">Tambahkan item baru ke inventaris.</p>
+            </CardContent>
+          </Card>
+        </Link>
 
         <Link to="/admin/borrow-requests">
           <Card className="hover:shadow-lg transition-shadow duration-200">
@@ -86,20 +90,31 @@ const AdminDashboard: React.FC = () => {
           </Card>
         </Link>
 
-        {userProfile?.role === 'Admin' && ( // Only show "User Management" for Admin role
-          <Link to="/admin/users">
-            <Card className="hover:shadow-lg transition-shadow duration-200">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Manajemen Pengguna</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold">Pengguna</p>
-                <p className="text-xs text-muted-foreground">Kelola peran dan profil pengguna.</p>
-              </CardContent>
-            </Card>
-          </Link>
-        )}
+        <Link to="/admin/users">
+          <Card className="hover:shadow-lg transition-shadow duration-200">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Manajemen Pengguna</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold">Pengguna</p>
+              <p className="text-xs text-muted-foreground">Kelola peran dan profil pengguna.</p>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link to="/admin/monitoring-reporting">
+          <Card className="hover:shadow-lg transition-shadow duration-200">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Pemantauan & Pelaporan</CardTitle>
+              <BarChart3 className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold">Laporan</p>
+              <p className="text-xs text-muted-foreground">Lihat semua transaksi dan stok barang.</p>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
     </div>
   );
