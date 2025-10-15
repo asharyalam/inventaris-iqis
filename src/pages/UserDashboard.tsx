@@ -3,7 +3,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, History, Handshake } from 'lucide-react';
+import { Package, Handshake } from 'lucide-react';
 import { useSession } from '@/components/SessionContextProvider';
 import { Button } from '@/components/ui/button';
 
@@ -11,7 +11,7 @@ const UserDashboard: React.FC = () => {
   const { userProfile } = useSession();
 
   return (
-    <div className="flex flex-col items-center justify-start w-full max-w-4xl mx-auto p-4 space-y-8">
+    <div className="flex flex-col items-center justify-start w-full max-w-4xl mx-auto space-y-8">
       <div className="text-center bg-white p-8 rounded-lg shadow-md w-full">
         <h2 className="text-4xl font-bold mb-4 text-blue-600">Selamat Datang, {userProfile?.first_name || 'Pengguna'}!</h2>
         <p className="text-xl text-blue-600 mb-6">

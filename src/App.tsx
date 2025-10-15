@@ -18,6 +18,8 @@ import ReturnRequestsAdminPage from "./pages/ReturnRequestsAdminPage";
 import BorrowRequestsAdminPage from "./pages/BorrowRequestsAdminPage";
 import UserManagementPage from "./pages/UserManagementPage";
 import AddItemForm from "./components/AddItemForm";
+import AppLayout from "./components/AppLayout"; // Import the new AppLayout
+import AdminConsumableRequestsPage from "./pages/AdminConsumableRequestsPage"; // Import new admin consumable requests page
 
 const queryClient = new QueryClient();
 
@@ -35,21 +37,21 @@ const App = () => (
             {/* Public/Redirected Route */}
             <Route path="/" element={<Index />} />
 
-            {/* Protected User Routes */}
+            {/* Protected Routes with Layout */}
             <Route element={<ProtectedRoute allowedRoles={['Pengguna', 'Admin', 'Kepala Sekolah']} />}>
-              <Route path="/dashboard" element={<UserDashboard />} />
-              <Route path="/consumable-requests" element={<ConsumableRequestsPage />} />
-              <Route path="/borrow-requests" element={<BorrowRequestsPage />} />
-            </Route>
-
-            {/* Protected Admin Routes */}
-            <Route element={<ProtectedRoute allowedRoles={['Admin', 'Kepala Sekolah']} />}>
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/items" element={<ItemList />} />
-              <Route path="/admin/add-item" element={<AddItemForm />} />
-              <Route path="/admin/return-requests" element={<ReturnRequestsAdminPage />} />
-              <Route path="/admin/borrow-requests" element={<BorrowRequestsAdminPage />} />
-              <Route path="/admin/users" element={<UserManagementPage />} />
+              <Route element={<AppLayout />}> {/* Wrap with AppLayout */}
+                <Route path="/dashboard" element={<UserDashboard />} />
+                <Route path="/consumable-requests" element={<ConsumableRequestsPage />} />
+                <Route path="/borrow-requests" element={<BorrowRequestsPage />} />
+                {/* Admin/Headmaster specific routes */}
+                <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/items" element={<ItemList />} />
+                <Route path="/admin/add-item" element={<AddItemForm />} />
+                <Route path="/admin/return-requests" element={<ReturnRequestsAdminPage />} />
+                <Route path="/admin/borrow-requests" element={<BorrowRequestsAdminPage />} />
+                <Route path="/admin/consumable-requests" element={<AdminConsumableRequestsPage />} /> {/* New Admin Consumable Requests Page */}
+                <Route path="/admin/users" element={<UserManagementPage />} />
+              </Route>
             </Route>
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
