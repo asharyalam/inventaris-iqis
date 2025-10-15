@@ -126,14 +126,12 @@ const MonitoringReportingPage: React.FC = () => {
     switch (status) {
       case 'Pending':
         return { text: 'Pending', classes: 'bg-yellow-100 text-yellow-800' };
-      case 'Approved by Headmaster':
-        return { text: 'Disetujui', classes: 'bg-blue-100 text-blue-800' };
-      case 'Approved':
+      case 'Disetujui Kepala Sekolah':
+        return { text: 'Disetujui Kepala Sekolah', classes: 'bg-blue-100 text-blue-800' };
+      case 'Diproses':
         return { text: 'Diproses', classes: 'bg-green-100 text-green-800' };
-      case 'Rejected':
+      case 'Ditolak':
         return { text: 'Ditolak', classes: 'bg-red-100 text-red-800' };
-      case 'Diserahkan':
-        return { text: 'Diserahkan', classes: 'bg-purple-100 text-purple-800' };
       default:
         return { text: status, classes: 'bg-gray-100 text-gray-800' };
     }
@@ -187,7 +185,7 @@ const MonitoringReportingPage: React.FC = () => {
                   <TableHead>Pengaju</TableHead>
                   <TableHead>Instansi</TableHead>
                   <TableHead>Kuantitas</TableHead>
-                  <TableHead>Tgl Peminjaman</TableHead> {/* New column */}
+                  <TableHead>Tgl Peminjaman</TableHead>
                   <TableHead>Tgl Permintaan</TableHead>
                   <TableHead>Status</TableHead>
                 </TableRow>

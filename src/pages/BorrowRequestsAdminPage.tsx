@@ -21,7 +21,7 @@ interface BorrowRequest {
   quantity: number;
   request_date: string;
   due_date: string;
-  borrow_start_date: string; // Add borrow_start_date
+  borrow_start_date: string;
   status: string;
   admin_notes: string | null;
   items: { name: string };
@@ -64,45 +64,43 @@ const BorrowRequestsAdminPage: React.FC = () => {
     queryFn: fetchAllBorrowRequests,
   });
 
-  const handleAction = async (status: 'Approved by Headmaster' | 'Approved' | 'Rejected' | 'Diserahkan') => {
+  const handleAction = async (actionType: 'approveHeadmaster' | 'reject' | 'handover') => {
     if (!selectedRequest || !user) return;
 
-    const updatePayload: { status: string; admin_notes: string; approved_by: string; approval_date: string; borrow_start_date?: string } = {
-      status: status,
-      admin_notes: adminNotes,
-      approved_by: user.id,
-      approval_date: new Date().toISOString(),
-    };
+    let newStatus: string;
+    let successMessage: string;
+    let shouldDecrementQuantity = false;
 
-    // If status is 'Diserahkan', set borrow_start_date to current date if not already set
-    if (status === 'Diserahkan') {
-      updatePayload.status = 'Diproses'; // Change status to Diproses after handover
-      // The borrow_start_date is already set by the user in the form.
-      // This action just confirms the handover.
+    if (actionType === 'approveHeadmaster') {
+      newStatus = 'Disetujui Kepala Sekolah';
+      successMessage = "Permintaan peminjaman berhasil disetujui oleh Kepala Sekolah!";
+    } else if (actionType === 'reject') {
+      newStatus = 'Ditolak';
+      successMessage = "Permintaan peminjaman berhasil ditolak!";
+    } else if (actionType === 'handover') {
+      newStatus = 'Diproses'; // Status becomes 'Diproses' upon handover
+      successMessage = "Barang berhasil diserahkan kepada peminjam!";
+      shouldDecrementQuantity = true; // Decrement quantity upon handover
+    } else {
+      return; // Should not happen
     }
 
     const { error: updateError } = await supabase
       .from('borrow_requests')
-      .update(updatePayload)
+      .update({
+        status: newStatus,
+        admin_notes: adminNotes,
+        approved_by: user.id,
+        approval_date: new Date().toISOString(),
+      })
       .eq('id', selectedRequest.id);
 
     if (updateError) {
       showError(`Gagal memperbarui permintaan: ${updateError.message}`);
     } else {
-      let successMessage = "";
-      if (status === 'Approved by Headmaster') {
-        successMessage = "Permintaan peminjaman berhasil disetujui!";
-      } else if (status === 'Approved') {
-        successMessage = "Permintaan peminjaman berhasil diproses!";
-      } else if (status === 'Rejected') {
-        successMessage = "Permintaan peminjaman berhasil ditolak!";
-      } else if (status === 'Diserahkan') {
-        successMessage = "Barang berhasil diserahkan kepada peminjam!";
-      }
       showSuccess(successMessage);
-      
-      // If approved by admin, update item quantity
-      if (status === 'Approved') { // This logic should now be for 'Diserahkan'
+
+      if (shouldDecrementQuantity) {
         const { data: itemData, error: itemError } = await supabase
           .from('items')
           .select('quantity')
@@ -124,11 +122,11 @@ const BorrowRequestsAdminPage: React.FC = () => {
             showSuccess("Kuantitas barang berhasil diperbarui.");
             queryClient.invalidateQueries({ queryKey: ['items'] });
             queryClient.invalidateQueries({ queryKey: ['inventorySummary'] });
-            queryClient.invalidateQueries({ queryKey: ['availableItemsForBorrow'] }); // Invalidate for borrow form
+            queryClient.invalidateQueries({ queryKey: ['availableItemsForBorrow'] });
           }
         }
       }
-      queryClient.invalidateQueries({ queryKey: ['borrowRequests', selectedRequest.user_id] }); // Invalidate user's specific borrow requests
+      queryClient.invalidateQueries({ queryKey: ['borrowRequests', selectedRequest.user_id] });
       refetch();
       setIsDialogOpen(false);
       setSelectedRequest(null);
@@ -157,14 +155,12 @@ const BorrowRequestsAdminPage: React.FC = () => {
     switch (status) {
       case 'Pending':
         return { text: 'Pending', classes: 'bg-yellow-100 text-yellow-800' };
-      case 'Approved by Headmaster':
-        return { text: 'Disetujui', classes: 'bg-blue-100 text-blue-800' };
-      case 'Approved':
+      case 'Disetujui Kepala Sekolah':
+        return { text: 'Disetujui Kepala Sekolah', classes: 'bg-blue-100 text-blue-800' };
+      case 'Diproses':
         return { text: 'Diproses', classes: 'bg-green-100 text-green-800' };
-      case 'Rejected':
+      case 'Ditolak':
         return { text: 'Ditolak', classes: 'bg-red-100 text-red-800' };
-      case 'Diserahkan': // New status
-        return { text: 'Diserahkan', classes: 'bg-purple-100 text-purple-800' };
       default:
         return { text: status, classes: 'bg-gray-100 text-gray-800' };
     }
@@ -181,7 +177,7 @@ const BorrowRequestsAdminPage: React.FC = () => {
               <TableHead>Peminjam</TableHead>
               <TableHead>Instansi</TableHead>
               <TableHead>Kuantitas</TableHead>
-              <TableHead>Tgl Peminjaman</TableHead> {/* New column */}
+              <TableHead>Tgl Peminjaman</TableHead>
               <TableHead>Tgl Jatuh Tempo</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Aksi</TableHead>
@@ -196,7 +192,7 @@ const BorrowRequestsAdminPage: React.FC = () => {
                   <TableCell>{`${request.profiles?.first_name || ''} ${request.profiles?.last_name || ''}`.trim() || 'N/A'}</TableCell>
                   <TableCell>{request.profiles?.instansi || '-'}</TableCell>
                   <TableCell>{request.quantity}</TableCell>
-                  <TableCell>{format(new Date(request.borrow_start_date), 'dd MMM yyyy', { locale: id })}</TableCell> {/* Display borrow_start_date */}
+                  <TableCell>{format(new Date(request.borrow_start_date), 'dd MMM yyyy', { locale: id })}</TableCell>
                   <TableCell>{format(new Date(request.due_date), 'dd MMM yyyy', { locale: id })}</TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusDisplay.classes}`}>
@@ -209,15 +205,15 @@ const BorrowRequestsAdminPage: React.FC = () => {
                         Tinjau
                       </Button>
                     )}
-                    {isAdmin && request.status === 'Approved by Headmaster' && (
-                      <Button variant="outline" size="sm" onClick={() => handleAction('Diserahkan')}> {/* New button for Admin */}
-                        Serahkan Barang
-                      </Button>
-                    )}
-                    {isAdmin && request.status === 'Approved by Headmaster' && (
-                      <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
-                        Proses (Admin)
-                      </Button>
+                    {isAdmin && request.status === 'Disetujui Kepala Sekolah' && (
+                      <>
+                        <Button variant="outline" size="sm" onClick={() => handleAction('handover')}>
+                          Serahkan Barang
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
+                          Tinjau
+                        </Button>
+                      </>
                     )}
                   </TableCell>
                 </TableRow>
@@ -249,7 +245,7 @@ const BorrowRequestsAdminPage: React.FC = () => {
                 <Input id="quantity" value={selectedRequest.quantity} className="col-span-3" readOnly />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="borrowStartDate" className="text-right">Tanggal Peminjaman</Label> {/* New field */}
+                <Label htmlFor="borrowStartDate" className="text-right">Tanggal Peminjaman</Label>
                 <Input id="borrowStartDate" value={format(new Date(selectedRequest.borrow_start_date), 'dd MMM yyyy', { locale: id })} className="col-span-3" readOnly />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
@@ -269,13 +265,11 @@ const BorrowRequestsAdminPage: React.FC = () => {
             </div>
           )}
           <DialogFooter>
-            <Button variant="destructive" onClick={() => handleAction('Rejected')}>Tolak</Button>
+            <Button variant="destructive" onClick={() => handleAction('reject')}>Tolak</Button>
             {isHeadmaster && selectedRequest?.status === 'Pending' && (
-              <Button onClick={() => handleAction('Approved by Headmaster')}>Setujui</Button>
+              <Button onClick={() => handleAction('approveHeadmaster')}>Setujui</Button>
             )}
-            {isAdmin && selectedRequest?.status === 'Approved by Headmaster' && (
-              <Button onClick={() => handleAction('Approved')}>Proses (Admin)</Button>
-            )}
+            {/* Admin tidak memiliki tombol 'Setujui' di dialog, hanya 'Tolak' atau tindakan langsung 'Serahkan Barang' */}
           </DialogFooter>
         </DialogContent>
       </Dialog>
