@@ -146,6 +146,7 @@ const UserManagementPage: React.FC = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Admin">Admin</SelectItem>
+                    <SelectItem value="Kepala Sekolah">Kepala Sekolah</SelectItem> {/* Ditambahkan: Opsi Kepala Sekolah */}
                     <SelectItem value="Pengguna">Pengguna</SelectItem>
                   </SelectContent>
                 </Select>
