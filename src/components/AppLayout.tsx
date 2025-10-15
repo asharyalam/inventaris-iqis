@@ -21,10 +21,10 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { title: "Dashboard", href: "/dashboard", icon: Home, roles: ["Pengguna", "Admin", "Kepala Sekolah"] },
-  { title: "Profil", href: "/profile", icon: UserIcon, roles: ["Pengguna", "Admin", "Kepala Sekolah"] }, // Placeholder for profile page
+  { title: "Profil", href: "/profile", icon: UserIcon, roles: ["Pengguna", "Admin"] }, // Diperbarui: Dihapus 'Kepala Sekolah'
   { title: "Permintaan Habis Pakai", href: "/consumable-requests", icon: Package, roles: ["Pengguna"] },
   { title: "Permintaan Peminjaman", href: "/borrow-requests", icon: Handshake, roles: ["Pengguna"] },
-  { title: "Manajemen Barang", href: "/admin/items", icon: Package, roles: ["Admin"] }, // Diperbarui: Hanya untuk Admin
+  { title: "Manajemen Barang", href: "/admin/items", icon: Package, roles: ["Admin"] },
   { title: "Tambah Barang Baru", href: "/admin/add-item", icon: PlusCircle, roles: ["Admin"] },
   { title: "Permintaan Peminjaman (Admin)", href: "/admin/borrow-requests", icon: Handshake, roles: ["Admin", "Kepala Sekolah"] },
   { title: "Permintaan Pengembalian (Admin)", href: "/admin/return-requests", icon: History, roles: ["Admin", "Kepala Sekolah"] },
