@@ -1,7 +1,8 @@
 "use client";
 
 import React from 'react';
-import ItemList from '@/components/ItemList'; // Import ItemList
+import ItemList from '@/components/ItemList';
+import RequestReturnForm from '@/components/RequestReturnForm'; // Import RequestReturnForm
 
 const Dashboard: React.FC = () => {
   return (
@@ -9,9 +10,10 @@ const Dashboard: React.FC = () => {
       <div className="text-center bg-white p-8 rounded-lg shadow-md w-full">
         <h2 className="text-4xl font-bold mb-4 text-gray-900">Dashboard Pengguna</h2>
         <p className="text-xl text-gray-600 mb-6">
-          Ini adalah halaman dashboard Anda. Anda dapat melihat daftar barang yang tersedia.
+          Ini adalah halaman dashboard Anda. Anda dapat melihat daftar barang yang tersedia dan mengajukan pengembalian.
         </p>
       </div>
+      <RequestReturnForm /> {/* Tambahkan formulir pengembalian */}
       <ItemList /> {/* Daftar barang untuk pengguna biasa */}
     </div>
   );
