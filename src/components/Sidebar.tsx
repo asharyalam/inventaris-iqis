@@ -5,7 +5,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, LayoutDashboard, Users } from 'lucide-react';
+import { Menu, LayoutDashboard, Users, History } from 'lucide-react'; // Import History icon
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useSession } from './SessionContextProvider';
 
@@ -46,13 +46,22 @@ const SidebarContent: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
         onClick={onClose}
       />
       {isAdmin && (
-        <NavLink
-          to="/admin/users"
-          icon={<Users className="h-4 w-4" />}
-          label="Manajemen Pengguna"
-          isActive={location.pathname === '/admin/users'}
-          onClick={onClose}
-        />
+        <>
+          <NavLink
+            to="/admin/users"
+            icon={<Users className="h-4 w-4" />}
+            label="Manajemen Pengguna"
+            isActive={location.pathname === '/admin/users'}
+            onClick={onClose}
+          />
+          <NavLink
+            to="/admin/return-requests"
+            icon={<History className="h-4 w-4" />}
+            label="Permintaan Pengembalian"
+            isActive={location.pathname === '/admin/return-requests'}
+            onClick={onClose}
+          />
+        </>
       )}
     </nav>
   );

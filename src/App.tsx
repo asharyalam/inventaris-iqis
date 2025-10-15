@@ -9,6 +9,7 @@ import Login from "./pages/Login"; // Import Login page
 import { SessionContextProvider } from "./components/SessionContextProvider"; // Import SessionContextProvider
 import ProtectedRoute from "./components/ProtectedRoute"; // Import ProtectedRoute
 import UserManagement from "./pages/UserManagement"; // Import UserManagement
+import AdminReturnRequests from "./pages/AdminReturnRequests"; // Import AdminReturnRequests
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
             <Route element={<ProtectedRoute />}> {/* Protect main routes */}
               <Route path="/" element={<Index />} />
               <Route path="/admin/users" element={<UserManagement />} /> {/* Add User Management route */}
+              <Route path="/admin/return-requests" element={<AdminReturnRequests />} /> {/* Add Admin Return Requests route */}
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             </Route>
             <Route path="*" element={<NotFound />} />
