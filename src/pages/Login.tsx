@@ -8,20 +8,18 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 
 const Login = () => {
-  const { session, isLoading, isAdmin, isHeadmaster } = useSession();
+  const { session, isLoading, isAdmin } = useSession();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!isLoading && session) {
       if (isAdmin) {
         navigate('/admin/dashboard', { replace: true });
-      } else if (isHeadmaster) {
-        navigate('/headmaster/dashboard', { replace: true }); // Redirect Headmaster
       } else {
         navigate('/dashboard', { replace: true });
       }
     }
-  }, [session, isLoading, isAdmin, isHeadmaster, navigate]);
+  }, [session, isLoading, isAdmin, navigate]);
 
   if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center">Memuat...</div>;
@@ -45,47 +43,10 @@ const Login = () => {
                   brandAccent: 'hsl(217.2 91.2% 59.8%)', // accent color
                 },
               },
-            },
+            }}
           }}
           theme="light"
           redirectTo={window.location.origin} // Redirect to current origin after auth
-          extraSignUpFields={[
-            {
-              name: 'first_name',
-              label: 'Nama Depan',
-              type: 'text',
-              required: true,
-              placeholder: 'Masukkan nama depan Anda',
-            },
-            {
-              name: 'last_name',
-              label: 'Nama Belakang',
-              type: 'text',
-              required: true,
-              placeholder: 'Masukkan nama belakang Anda',
-            },
-            {
-              name: 'instansi',
-              label: 'Instansi',
-              type: 'select',
-              required: true,
-              options: [
-                { value: 'BPH', label: 'BPH' },
-                { value: 'TKIT', label: 'TKIT' },
-                { value: 'SDIT', label: 'SDIT' },
-                { value: 'SMPIT', label: 'SMPIT' },
-                { value: 'SMKIT', label: 'SMKIT' },
-                { value: 'BK', label: 'BK' },
-              ],
-            },
-            {
-              name: 'position', // Using 'position' for 'jabatan'
-              label: 'Jabatan',
-              type: 'text',
-              required: true,
-              placeholder: 'Masukkan jabatan Anda',
-            },
-          ]}
         />
       </div>
     </div>

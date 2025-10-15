@@ -6,7 +6,7 @@ import { useSession } from "@/components/SessionContextProvider";
 import { MadeWithDyad } from "@/components/made-with-dyad";
 
 const Index = () => {
-  const { session, isLoading, isAdmin, isHeadmaster } = useSession();
+  const { session, isLoading, isAdmin } = useSession();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -14,8 +14,6 @@ const Index = () => {
       if (session) {
         if (isAdmin) {
           navigate('/admin/dashboard', { replace: true });
-        } else if (isHeadmaster) {
-          navigate('/headmaster/dashboard', { replace: true }); // Redirect Headmaster
         } else {
           navigate('/dashboard', { replace: true });
         }
@@ -23,7 +21,7 @@ const Index = () => {
         navigate('/login', { replace: true });
       }
     }
-  }, [session, isLoading, isAdmin, isHeadmaster, navigate]);
+  }, [session, isLoading, isAdmin, navigate]);
 
   if (isLoading) {
     return (

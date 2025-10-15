@@ -3,7 +3,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Package, History, Handshake, PlusCircle, ClipboardList } from 'lucide-react'; // Added ClipboardList
+import { Users, Package, History, Handshake, PlusCircle } from 'lucide-react';
 import { useSession } from '@/components/SessionContextProvider';
 
 const AdminDashboard: React.FC = () => {
@@ -45,28 +45,15 @@ const AdminDashboard: React.FC = () => {
           </Card>
         </Link>
 
-        <Link to="/admin/consumable-processing">
+        <Link to="/admin/borrow-requests">
           <Card className="hover:shadow-lg transition-shadow duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pemrosesan Permintaan</CardTitle>
-              <ClipboardList className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold">Proses</p>
-              <p className="text-xs text-muted-foreground">Serahkan permintaan barang habis pakai yang disetujui.</p>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link to="/admin/borrow-processing">
-          <Card className="hover:shadow-lg transition-shadow duration-200">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pemrosesan Peminjaman</CardTitle>
+              <CardTitle className="text-sm font-medium">Permintaan Peminjaman</CardTitle>
               <Handshake className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">Proses</p>
-              <p className="text-xs text-muted-foreground">Serahkan permintaan peminjaman barang yang disetujui.</p>
+              <p className="text-2xl font-bold">Tinjau</p>
+              <p className="text-xs text-muted-foreground">Kelola permintaan peminjaman barang.</p>
             </CardContent>
           </Card>
         </Link>
@@ -74,12 +61,12 @@ const AdminDashboard: React.FC = () => {
         <Link to="/admin/return-requests">
           <Card className="hover:shadow-lg transition-shadow duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Manajemen Pengembalian</CardTitle>
+              <CardTitle className="text-sm font-medium">Permintaan Pengembalian</CardTitle>
               <History className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">Verifikasi</p>
-              <p className="text-xs text-muted-foreground">Verifikasi dan terima pengembalian barang.</p>
+              <p className="text-2xl font-bold">Tinjau</p>
+              <p className="text-xs text-muted-foreground">Kelola permintaan pengembalian barang.</p>
             </CardContent>
           </Card>
         </Link>
