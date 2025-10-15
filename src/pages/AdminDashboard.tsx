@@ -3,13 +3,14 @@
 import React from 'react';
 import ItemList from '@/components/ItemList';
 import AddItemForm from '@/components/AddItemForm';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // Import Card components
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 interface InventorySummary {
   totalItems: number;
-  pendingReturnRequests: number; // Add pending return requests count
+  pendingReturnRequests: number;
+  pendingBorrowRequests: number; // Add pending borrow requests count
 }
 
 const fetchInventorySummary = async (): Promise<InventorySummary> => {
@@ -23,18 +24,29 @@ const fetchInventorySummary = async (): Promise<InventorySummary> => {
   }
 
   // Fetch total number of pending return requests
-  const { count: pendingRequestsCount, error: requestsError } = await supabase
+  const { count: pendingReturnRequestsCount, error: returnRequestsError } = await supabase
     .from('return_requests')
     .select('*', { count: 'exact', head: true })
     .eq('status', 'Pending');
 
-  if (requestsError) {
-    throw new Error(`Error fetching pending return requests: ${requestsError.message}`);
+  if (returnRequestsError) {
+    throw new Error(`Error fetching pending return requests: ${returnRequestsError.message}`);
+  }
+
+  // Fetch total number of pending borrow requests
+  const { count: pendingBorrowRequestsCount, error: borrowRequestsError } = await supabase
+    .from('borrow_requests')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'Pending');
+
+  if (borrowRequestsError) {
+    throw new Error(`Error fetching pending borrow requests: ${borrowRequestsError.message}`);
   }
 
   return {
     totalItems: totalItemsCount || 0,
-    pendingReturnRequests: pendingRequestsCount || 0,
+    pendingReturnRequests: pendingReturnRequestsCount || 0,
+    pendingBorrowRequests: pendingBorrowRequestsCount || 0,
   };
 };
 
@@ -58,7 +70,7 @@ const AdminDashboard: React.FC = () => {
       ) : summaryError ? (
         <div className="text-center text-red-500">Error: {summaryError.message}</div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full"> {/* Changed to 2 columns for summary cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full"> {/* Changed to 3 columns for summary cards */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Barang</CardTitle>
@@ -104,6 +116,33 @@ const AdminDashboard: React.FC = () => {
               <div className="text-2xl font-bold">{summary?.pendingReturnRequests}</div>
               <p className="text-xs text-muted-foreground">
                 Jumlah permintaan pengembalian yang menunggu persetujuan.
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Permintaan Peminjaman Menunggu</CardTitle>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                className="h-4 w-4 text-muted-foreground"
+              >
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <path d="M14 2v6h6"></path>
+                <path d="M12 17h.01"></path>
+                <path d="M7 10h10"></path>
+                <path d="M7 14h10"></path>
+              </svg>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{summary?.pendingBorrowRequests}</div>
+              <p className="text-xs text-muted-foreground">
+                Jumlah permintaan peminjaman yang menunggu persetujuan.
               </p>
             </CardContent>
           </Card>

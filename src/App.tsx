@@ -5,11 +5,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import Login from "./pages/Login"; // Import Login page
-import { SessionContextProvider } from "./components/SessionContextProvider"; // Import SessionContextProvider
-import ProtectedRoute from "./components/ProtectedRoute"; // Import ProtectedRoute
-import UserManagement from "./pages/UserManagement"; // Import UserManagement
-import AdminReturnRequests from "./pages/AdminReturnRequests"; // Import AdminReturnRequests
+import Login from "./pages/Login";
+import { SessionContextProvider } from "./components/SessionContextProvider";
+import ProtectedRoute from "./components/ProtectedRoute";
+import UserManagement from "./pages/UserManagement";
+import AdminReturnRequests from "./pages/AdminReturnRequests";
+import AdminBorrowRequests from "./pages/AdminBorrowRequests"; // Import AdminBorrowRequests
 
 const queryClient = new QueryClient();
 
@@ -19,13 +20,14 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <SessionContextProvider> {/* Wrap the app with SessionContextProvider */}
+        <SessionContextProvider>
           <Routes>
-            <Route path="/login" element={<Login />} /> {/* Add Login route */}
-            <Route element={<ProtectedRoute />}> {/* Protect main routes */}
+            <Route path="/login" element={<Login />} />
+            <Route element={<ProtectedRoute />}>
               <Route path="/" element={<Index />} />
-              <Route path="/admin/users" element={<UserManagement />} /> {/* Add User Management route */}
-              <Route path="/admin/return-requests" element={<AdminReturnRequests />} /> {/* Add Admin Return Requests route */}
+              <Route path="/admin/users" element={<UserManagement />} />
+              <Route path="/admin/return-requests" element={<AdminReturnRequests />} />
+              <Route path="/admin/borrow-requests" element={<AdminBorrowRequests />} /> {/* Add Admin Borrow Requests route */}
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             </Route>
             <Route path="*" element={<NotFound />} />

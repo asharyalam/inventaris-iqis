@@ -5,7 +5,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, LayoutDashboard, Users, History } from 'lucide-react'; // Import History icon
+import { Menu, LayoutDashboard, Users, History, Handshake } from 'lucide-react'; // Import History and Handshake icons
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useSession } from './SessionContextProvider';
 
@@ -59,6 +59,13 @@ const SidebarContent: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
             icon={<History className="h-4 w-4" />}
             label="Permintaan Pengembalian"
             isActive={location.pathname === '/admin/return-requests'}
+            onClick={onClose}
+          />
+          <NavLink
+            to="/admin/borrow-requests"
+            icon={<Handshake className="h-4 w-4" />}
+            label="Permintaan Peminjaman"
+            isActive={location.pathname === '/admin/borrow-requests'}
             onClick={onClose}
           />
         </>
