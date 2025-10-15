@@ -11,6 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { supabase } from '@/integrations/supabase/client';
 import { showSuccess, showError } from '@/utils/toast';
 import { useQueryClient } from '@tanstack/react-query';
+import { useSession } from './SessionContextProvider'; // Import useSession
 
 interface Item {
   id: string;
@@ -32,6 +33,7 @@ interface EditItemFormProps {
 
 const EditItemForm: React.FC<EditItemFormProps> = ({ item, onSuccess }) => {
   const queryClient = useQueryClient();
+  const { userProfile } = useSession(); // Dapatkan userProfile
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -43,6 +45,11 @@ const EditItemForm: React.FC<EditItemFormProps> = ({ item, onSuccess }) => {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (userProfile?.role !== 'Admin') { // Periksa peran admin
+      showError("Anda tidak memiliki izin untuk memperbarui barang.");
+      return;
+    }
+
     const { error } = await supabase
       .from('items')
       .update({

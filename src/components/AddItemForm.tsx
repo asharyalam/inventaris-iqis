@@ -21,7 +21,7 @@ const formSchema = z.object({
 
 const AddItemForm: React.FC = () => {
   const queryClient = useQueryClient();
-  const { user } = useSession();
+  const { user, userProfile } = useSession(); // Dapatkan userProfile
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -33,8 +33,8 @@ const AddItemForm: React.FC = () => {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    if (!user) {
-      showError("Anda harus login untuk menambahkan barang.");
+    if (!user || userProfile?.role !== 'Admin') { // Periksa peran admin
+      showError("Anda tidak memiliki izin untuk menambahkan barang.");
       return;
     }
 
