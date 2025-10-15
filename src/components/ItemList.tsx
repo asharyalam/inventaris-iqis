@@ -1,11 +1,14 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { showError } from '@/utils/toast';
+import { useSession } from './SessionContextProvider'; // Import useSession
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"; // Import Dialog components
+import EditItemForm from './EditItemForm'; // Import EditItemForm
 
 interface Item {
   id: string;
@@ -29,6 +32,11 @@ const ItemList: React.FC = () => {
     queryKey: ['items'],
     queryFn: fetchItems,
   });
+  const { userProfile } = useSession(); // Dapatkan profil pengguna
+  const isAdmin = userProfile?.role === 'Admin';
+
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<Item | null>(null);
 
   const handleDelete = async (id: string) => {
     if (!window.confirm("Apakah Anda yakin ingin menghapus barang ini?")) {
@@ -40,6 +48,17 @@ const ItemList: React.FC = () => {
     } else {
       refetch(); // Refresh the list after deletion
     }
+  };
+
+  const handleEditClick = (item: Item) => {
+    setEditingItem(item);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleEditSuccess = () => {
+    setIsEditDialogOpen(false);
+    setEditingItem(null);
+    refetch(); // Refetch items after successful edit
   };
 
   if (isLoading) {
@@ -61,7 +80,7 @@ const ItemList: React.FC = () => {
               <TableHead>Deskripsi</TableHead>
               <TableHead>Kuantitas</TableHead>
               <TableHead>Harga</TableHead>
-              <TableHead className="text-right">Aksi</TableHead>
+              {isAdmin && <TableHead className="text-right">Aksi</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -71,17 +90,33 @@ const ItemList: React.FC = () => {
                 <TableCell>{item.description || '-'}</TableCell>
                 <TableCell>{item.quantity}</TableCell>
                 <TableCell>{item.price ? `Rp${item.price.toLocaleString('id-ID')}` : 'Rp0'}</TableCell>
-                <TableCell className="text-right">
-                  <Button variant="destructive" size="sm" onClick={() => handleDelete(item.id)}>
-                    Hapus
-                  </Button>
-                </TableCell>
+                {isAdmin && (
+                  <TableCell className="text-right space-x-2">
+                    <Button variant="outline" size="sm" onClick={() => handleEditClick(item)}>
+                      Edit
+                    </Button>
+                    <Button variant="destructive" size="sm" onClick={() => handleDelete(item.id)}>
+                      Hapus
+                    </Button>
+                  </TableCell>
+                )}
               </TableRow>
             ))}
           </TableBody>
         </Table>
       ) : (
         <p className="text-center text-gray-500">Belum ada barang yang ditambahkan.</p>
+      )}
+
+      {editingItem && (
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Edit Barang</DialogTitle>
+            </DialogHeader>
+            <EditItemForm item={editingItem} onSuccess={handleEditSuccess} />
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );
