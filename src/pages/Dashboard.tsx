@@ -2,7 +2,8 @@
 
 import React from 'react';
 import ItemList from '@/components/ItemList';
-import RequestReturnForm from '@/components/RequestReturnForm'; // Import RequestReturnForm
+import RequestReturnForm from '@/components/RequestReturnForm';
+import UserReturnRequests from '@/components/UserReturnRequests'; // Import UserReturnRequests
 
 const Dashboard: React.FC = () => {
   return (
@@ -13,8 +14,9 @@ const Dashboard: React.FC = () => {
           Ini adalah halaman dashboard Anda. Anda dapat melihat daftar barang yang tersedia dan mengajukan pengembalian.
         </p>
       </div>
-      <RequestReturnForm /> {/* Tambahkan formulir pengembalian */}
-      <ItemList /> {/* Daftar barang untuk pengguna biasa */}
+      <RequestReturnForm />
+      <UserReturnRequests /> {/* Tambahkan daftar permintaan pengembalian pengguna */}
+      <ItemList />
     </div>
   );
 };
