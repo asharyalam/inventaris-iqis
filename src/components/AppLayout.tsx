@@ -6,7 +6,7 @@ import { useSession } from '@/components/SessionContextProvider';
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Home, Package, Handshake, History, Users, PlusCircle, LogOut, Menu, User as UserIcon, BarChart3, RotateCcw } from 'lucide-react'; // Import RotateCcw icon
+import { Home, Package, Handshake, History, Users, PlusCircle, LogOut, Menu, User as UserIcon, BarChart3, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
@@ -25,12 +25,12 @@ const navItems: NavItem[] = [
   { title: "Profil", href: "/profile", icon: UserIcon, roles: ["Pengguna", "Admin", "Kepala Sekolah"] },
   { title: "Permintaan Habis Pakai", href: "/consumable-requests", icon: Package, roles: ["Pengguna"] },
   { title: "Permintaan Peminjaman", href: "/borrow-requests", icon: Handshake, roles: ["Pengguna"] },
-  { title: "Permintaan Pengembalian", href: "/return-requests", icon: RotateCcw, roles: ["Pengguna"] }, // New nav item
+  { title: "Permintaan Pengembalian", href: "/return-requests", icon: RotateCcw, roles: ["Pengguna"] },
   { title: "Manajemen Barang", href: "/admin/items", icon: Package, roles: ["Admin"] },
   { title: "Tambah Barang Baru", href: "/admin/add-item", icon: PlusCircle, roles: ["Admin"] },
-  { title: "Manajemen Peminjaman", href: "/admin/borrow-requests", icon: Handshake, roles: ["Admin", "Kepala Sekolah"] }, // Diperbarui
-  { title: "Manajemen Pengembalian", href: "/admin/return-requests", icon: History, roles: ["Admin"] },
-  { title: "Manajemen Permintaan", href: "/admin/consumable-requests", icon: Package, roles: ["Admin", "Kepala Sekolah"] }, // Diperbarui
+  { title: "Manajemen Peminjaman", href: "/admin/borrow-requests", icon: Handshake, roles: ["Admin", "Kepala Sekolah"] },
+  { title: "Manajemen Pengembalian", href: "/admin/return-requests", icon: History, roles: ["Admin"] }, // Hanya untuk Admin
+  { title: "Manajemen Permintaan", href: "/admin/consumable-requests", icon: Package, roles: ["Admin", "Kepala Sekolah"] },
   { title: "Manajemen Pengguna", href: "/admin/users", icon: Users, roles: ["Admin"] },
   { title: "Pemantauan & Pelaporan", href: "/admin/monitoring-reporting", icon: BarChart3, roles: ["Kepala Sekolah"] },
 ];

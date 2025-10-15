@@ -23,8 +23,8 @@ const formSchema = z.object({
   quantity: z.number().min(1, { message: "Kuantitas harus minimal 1." }),
   borrow_start_date: z.date({ required_error: "Tanggal peminjaman wajib diisi." }),
   due_date: z.date({ required_error: "Tanggal pengembalian wajib diisi." }),
-}).refine((data) => data.due_date > data.borrow_start_date, {
-  message: "Tanggal pengembalian harus setelah tanggal peminjaman.",
+}).refine((data) => data.due_date >= data.borrow_start_date, { // Changed from > to >=
+  message: "Tanggal pengembalian harus setelah atau sama dengan tanggal peminjaman.",
   path: ["due_date"],
 });
 
