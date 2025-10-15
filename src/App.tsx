@@ -11,8 +11,9 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import UserManagement from "./pages/UserManagement";
 import AdminReturnRequests from "./pages/AdminReturnRequests";
 import AdminBorrowRequests from "./pages/AdminBorrowRequests";
+import AdminConsumableRequests from "./pages/AdminConsumableRequests"; // Import new admin consumable requests page
 import ItemManagement from "./pages/ItemManagement";
-import AdminPageLayout from "./components/AdminPageLayout"; // Import the new layout
+import AdminPageLayout from "./components/AdminPageLayout";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ const App = () => (
                 <Route path="/admin/users" element={<UserManagement />} />
                 <Route path="/admin/return-requests" element={<AdminReturnRequests />} />
                 <Route path="/admin/borrow-requests" element={<AdminBorrowRequests />} />
+                <Route path="/admin/consumable-requests" element={<AdminConsumableRequests />} /> {/* New admin route */}
                 <Route path="/admin/items" element={<ItemManagement />} />
               </Route>
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

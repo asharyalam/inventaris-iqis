@@ -25,11 +25,11 @@ const formSchema = z.object({
   quantity: z.coerce.number().min(1, { message: "Kuantitas minimal 1." }),
 });
 
-const fetchAvailableItemsForBorrow = async (): Promise<Item[]> => {
+const fetchAvailableConsumableItems = async (): Promise<Item[]> => {
   const { data, error } = await supabase
     .from('items')
     .select('id, name, quantity, type')
-    .eq('type', 'returnable') // Filter for returnable items
+    .eq('type', 'consumable') // Filter for consumable items
     .gt('quantity', 0); // Only show items with quantity > 0
 
   if (error) {
@@ -38,13 +38,13 @@ const fetchAvailableItemsForBorrow = async (): Promise<Item[]> => {
   return data || [];
 };
 
-const RequestBorrowForm: React.FC = () => {
+const RequestConsumableForm: React.FC = () => {
   const queryClient = useQueryClient();
   const { user } = useSession();
 
   const { data: items, isLoading: isLoadingItems, error: itemsError } = useQuery<Item[], Error>({
-    queryKey: ['availableItemsForBorrow'], // Unique query key
-    queryFn: fetchAvailableItemsForBorrow,
+    queryKey: ['availableConsumableItems'], // Unique query key for consumable items
+    queryFn: fetchAvailableConsumableItems,
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -55,10 +55,10 @@ const RequestBorrowForm: React.FC = () => {
     },
   });
 
-  const submitBorrowRequestMutation = useMutation<void, Error, z.infer<typeof formSchema>>({
+  const submitConsumableRequestMutation = useMutation<void, Error, z.infer<typeof formSchema>>({
     mutationFn: async (values) => {
       if (!user) {
-        throw new Error("Anda harus login untuk mengajukan permintaan peminjaman.");
+        throw new Error("Anda harus login untuk mengajukan permintaan barang.");
       }
 
       const selectedItem = items?.find(item => item.id === values.itemId);
@@ -66,17 +66,16 @@ const RequestBorrowForm: React.FC = () => {
         throw new Error("Barang tidak ditemukan.");
       }
       if (values.quantity > selectedItem.quantity) {
-        throw new Error(`Kuantitas peminjaman tidak boleh melebihi stok yang tersedia (${selectedItem.quantity}).`);
+        throw new Error(`Kuantitas permintaan tidak boleh melebihi stok yang tersedia (${selectedItem.quantity}).`);
       }
 
       const { error } = await supabase
-        .from('borrow_requests')
+        .from('consumable_requests') // Insert into new table
         .insert({
           item_id: values.itemId,
           user_id: user.id,
           quantity: values.quantity,
           status: 'Pending',
-          // due_date can be set by admin upon approval for returnable items
         });
 
       if (error) {
@@ -84,10 +83,10 @@ const RequestBorrowForm: React.FC = () => {
       }
     },
     onSuccess: () => {
-      showSuccess("Permintaan peminjaman berhasil diajukan!");
+      showSuccess("Permintaan barang habis pakai berhasil diajukan!");
       form.reset();
-      queryClient.invalidateQueries({ queryKey: ['availableItemsForBorrow'] });
-      queryClient.invalidateQueries({ queryKey: ['userBorrowRequests'] });
+      queryClient.invalidateQueries({ queryKey: ['availableConsumableItems'] });
+      queryClient.invalidateQueries({ queryKey: ['userConsumableRequests'] }); // Invalidate new user consumable requests
       queryClient.invalidateQueries({ queryKey: ['inventorySummary'] }); // Invalidate summary
     },
     onError: (err) => {
@@ -96,7 +95,7 @@ const RequestBorrowForm: React.FC = () => {
   });
 
   if (isLoadingItems) {
-    return <div className="text-center">Memuat daftar barang...</div>;
+    return <div className="text-center">Memuat daftar barang habis pakai...</div>;
   }
 
   if (itemsError) {
@@ -105,9 +104,9 @@ const RequestBorrowForm: React.FC = () => {
 
   return (
     <div className="w-full max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h3 className="text-2xl font-semibold mb-4">Ajukan Permintaan Peminjaman Barang (Harus Dikembalikan)</h3>
+      <h3 className="text-2xl font-semibold mb-4">Ajukan Permintaan Barang Habis Pakai</h3>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(submitBorrowRequestMutation.mutate)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(submitConsumableRequestMutation.mutate)} className="space-y-4">
           <FormField
             control={form.control}
             name="itemId"
@@ -117,7 +116,7 @@ const RequestBorrowForm: React.FC = () => {
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Pilih barang yang akan dipinjam" />
+                      <SelectValue placeholder="Pilih barang habis pakai" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -145,8 +144,8 @@ const RequestBorrowForm: React.FC = () => {
               </FormItem>
             )}
           />
-          <Button type="submit" className="w-full" disabled={submitBorrowRequestMutation.isPending}>
-            {submitBorrowRequestMutation.isPending ? "Mengajukan..." : "Ajukan Peminjaman"}
+          <Button type="submit" className="w-full" disabled={submitConsumableRequestMutation.isPending}>
+            {submitConsumableRequestMutation.isPending ? "Mengajukan..." : "Ajukan Permintaan"}
           </Button>
         </form>
       </Form>
@@ -154,4 +153,4 @@ const RequestBorrowForm: React.FC = () => {
   );
 };
 
-export default RequestBorrowForm;
+export default RequestConsumableForm;
