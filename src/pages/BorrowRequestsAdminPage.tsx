@@ -225,26 +225,26 @@ const BorrowRequestsAdminPage: React.FC = () => {
                     </span>
                   </TableCell>
                   <TableCell className="text-right space-x-2">
-                    {isHeadmaster && request.status === 'Pending' && (
+                    {isHeadmaster && request.status === 'Menunggu Persetujuan' && (
                       <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
                         Tinjau
                       </Button>
                     )}
                     {isAdmin && request.status === 'Disetujui' && (
-                      <Button variant="outline" size="sm" onClick={() => handleAction('handover')}>
+                      <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
                         Proses
                       </Button>
                     )}
                     {isAdmin && request.status === 'Diproses' && (
-                      <Button variant="outline" size="sm" onClick={() => handleAction('return')}>
+                      <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
                         Proses Pengembalian
                       </Button>
                     )}
-                    {(isHeadmaster && request.status !== 'Pending') || (isAdmin && request.status !== 'Disetujui' && request.status !== 'Diproses') ? (
+                    {((isHeadmaster && request.status !== 'Menunggu Persetujuan') || (isAdmin && request.status !== 'Disetujui' && request.status !== 'Diproses')) && (
                       <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
                         Lihat Detail
                       </Button>
-                    ) : null}
+                    )}
                   </TableCell>
                 </TableRow>
               );
@@ -296,13 +296,13 @@ const BorrowRequestsAdminPage: React.FC = () => {
                   onChange={(e) => setAdminNotes(e.target.value)}
                   className="col-span-3"
                   placeholder="Tambahkan catatan admin..."
-                  readOnly={selectedRequest.status !== 'Pending' && selectedRequest.status !== 'Disetujui' && selectedRequest.status !== 'Diproses'}
+                  readOnly={selectedRequest.status !== 'Menunggu Persetujuan' && selectedRequest.status !== 'Disetujui' && selectedRequest.status !== 'Diproses'}
                 />
               </div>
             </div>
           )}
           <DialogFooter>
-            {isHeadmaster && selectedRequest?.status === 'Pending' && (
+            {isHeadmaster && selectedRequest?.status === 'Menunggu Persetujuan' && (
               <>
                 <Button variant="destructive" onClick={() => handleAction('reject')}>Tolak</Button>
                 <Button onClick={() => handleAction('approve')}>Setujui</Button>

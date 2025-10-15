@@ -9,7 +9,8 @@ import { showSuccess, showError } from '@/utils/toast';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
+import { Textarea }
+ from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useSession } from '@/components/SessionContextProvider';
@@ -187,7 +188,7 @@ const AdminConsumableRequestsPage: React.FC = () => {
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
-                    {isHeadmaster && request.status === 'Pending' && (
+                    {isHeadmaster && request.status === 'Menunggu Persetujuan' && (
                       <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
                         Tinjau
                       </Button>
@@ -195,6 +196,11 @@ const AdminConsumableRequestsPage: React.FC = () => {
                     {isAdmin && request.status === 'Disetujui' && (
                       <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
                         Proses
+                      </Button>
+                    )}
+                    {((isHeadmaster && request.status !== 'Menunggu Persetujuan') || (isAdmin && request.status !== 'Disetujui')) && (
+                      <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
+                        Lihat Detail
                       </Button>
                     )}
                   </TableCell>
@@ -240,7 +246,7 @@ const AdminConsumableRequestsPage: React.FC = () => {
           )}
           <DialogFooter>
             <Button variant="destructive" onClick={() => handleAction('Ditolak')}>Tolak</Button>
-            {isHeadmaster && selectedRequest?.status === 'Pending' && (
+            {isHeadmaster && selectedRequest?.status === 'Menunggu Persetujuan' && (
               <Button onClick={() => handleAction('Disetujui')}>Setujui</Button>
             )}
             {isAdmin && selectedRequest?.status === 'Disetujui' && (
