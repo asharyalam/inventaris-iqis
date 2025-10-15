@@ -158,7 +158,7 @@ const AdminConsumableRequestsPage: React.FC = () => {
 
   return (
     <div className="w-full max-w-6xl mx-auto p-4">
-      <h2 className="text-3xl font-bold mb-6 text-center">Manajemen Permintaan Barang Habis Pakai</h2>
+      <h2 className="text-3xl font-bold mb-6 text-center">Manajemen Permintaan Barang</h2> {/* Diperbarui */}
       {requests && requests.length > 0 ? (
         <Table>
           <TableHeader>

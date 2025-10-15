@@ -54,7 +54,7 @@ const AdminDashboard: React.FC = () => {
         <Link to="/admin/borrow-requests">
           <Card className="hover:shadow-lg transition-shadow duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Manajemen Peminjaman</CardTitle> {/* Diperbarui */}
+              <CardTitle className="text-sm font-medium">Manajemen Peminjaman Barang</CardTitle> {/* Diperbarui */}
               <Handshake className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -80,7 +80,7 @@ const AdminDashboard: React.FC = () => {
         <Link to="/admin/consumable-requests">
           <Card className="hover:shadow-lg transition-shadow duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Manajemen Permintaan Barang Habis Pakai</CardTitle> {/* Baru */}
+              <CardTitle className="text-sm font-medium">Manajemen Permintaan Barang</CardTitle> {/* Diperbarui */}
               <Package className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
