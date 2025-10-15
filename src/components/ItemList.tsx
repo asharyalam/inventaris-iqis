@@ -5,11 +5,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input"; // Import Input component
+import { Input } from "@/components/ui/input";
 import { showError } from '@/utils/toast';
 import { useSession } from './SessionContextProvider';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import EditItemForm from './EditItemForm';
+import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationLink, PaginationNext, PaginationEllipsis } from "@/components/ui/pagination"; // Import Pagination components
 
 interface Item {
   id: string;
@@ -20,27 +21,47 @@ interface Item {
   created_at: string;
 }
 
-// Modifikasi fetchItems untuk menerima searchTerm
-const fetchItems = async (searchTerm: string = ''): Promise<Item[]> => {
-  let query = supabase.from('items').select('*');
+interface PaginatedItems {
+  items: Item[];
+  totalCount: number;
+}
+
+// Modifikasi fetchItems untuk menerima searchTerm, page, dan pageSize
+const fetchItems = async (searchTerm: string = '', page: number, pageSize: number): Promise<PaginatedItems> => {
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  let query = supabase.from('items').select('*', { count: 'exact' });
 
   if (searchTerm) {
-    query = query.ilike('name', `%${searchTerm}%`); // Mencari berdasarkan nama barang
+    query = query.ilike('name', `%${searchTerm}%`);
   }
 
-  const { data, error } = await query.order('created_at', { ascending: false });
+  const { data, error, count } = await query
+    .order('created_at', { ascending: false })
+    .range(from, to);
+
   if (error) {
     throw new Error(error.message);
   }
-  return data;
+
+  return { items: data || [], totalCount: count || 0 };
 };
 
 const ItemList: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState(''); // State untuk input pencarian
-  const { data: items, isLoading, error, refetch } = useQuery<Item[], Error>({
-    queryKey: ['items', searchTerm], // Tambahkan searchTerm ke queryKey
-    queryFn: () => fetchItems(searchTerm), // Panggil fetchItems dengan searchTerm
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10; // Jumlah item per halaman
+
+  const { data, isLoading, error, refetch } = useQuery<PaginatedItems, Error>({
+    queryKey: ['items', searchTerm, currentPage, itemsPerPage], // Tambahkan currentPage dan itemsPerPage ke queryKey
+    queryFn: () => fetchItems(searchTerm, currentPage, itemsPerPage), // Panggil fetchItems dengan parameter paginasi
   });
+
+  const items = data?.items || [];
+  const totalCount = data?.totalCount || 0;
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
+
   const { userProfile } = useSession();
   const isAdmin = userProfile?.role === 'Admin';
 
@@ -70,6 +91,12 @@ const ItemList: React.FC = () => {
     refetch();
   };
 
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
   if (isLoading) {
     return <div className="text-center">Memuat daftar barang...</div>;
   }
@@ -86,42 +113,69 @@ const ItemList: React.FC = () => {
           type="text"
           placeholder="Cari barang berdasarkan nama..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1); // Reset ke halaman 1 saat mencari
+          }}
           className="w-full"
         />
       </div>
       {items && items.length > 0 ? (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nama</TableHead>
-              <TableHead>Deskripsi</TableHead>
-              <TableHead>Kuantitas</TableHead>
-              <TableHead>Harga</TableHead>
-              {isAdmin && <TableHead className="text-right">Aksi</TableHead>}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {items.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell className="font-medium">{item.name}</TableCell>
-                <TableCell>{item.description || '-'}</TableCell>
-                <TableCell>{item.quantity}</TableCell>
-                <TableCell>{item.price ? `Rp${item.price.toLocaleString('id-ID')}` : 'Rp0'}</TableCell>
-                {isAdmin && (
-                  <TableCell className="text-right space-x-2">
-                    <Button variant="outline" size="sm" onClick={() => handleEditClick(item)}>
-                      Edit
-                    </Button>
-                    <Button variant="destructive" size="sm" onClick={() => handleDelete(item.id)}>
-                      Hapus
-                    </Button>
-                  </TableCell>
-                )}
+        <>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nama</TableHead>
+                <TableHead>Deskripsi</TableHead>
+                <TableHead>Kuantitas</TableHead>
+                <TableHead>Harga</TableHead>
+                {isAdmin && <TableHead className="text-right">Aksi</TableHead>}
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {items.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell className="font-medium">{item.name}</TableCell>
+                  <TableCell>{item.description || '-'}</TableCell>
+                  <TableCell>{item.quantity}</TableCell>
+                  <TableCell>{item.price ? `Rp${item.price.toLocaleString('id-ID')}` : 'Rp0'}</TableCell>
+                  {isAdmin && (
+                    <TableCell className="text-right space-x-2">
+                      <Button variant="outline" size="sm" onClick={() => handleEditClick(item)}>
+                        Edit
+                      </Button>
+                      <Button variant="destructive" size="sm" onClick={() => handleDelete(item.id)}>
+                        Hapus
+                      </Button>
+                    </TableCell>
+                  )}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          {totalPages > 1 && (
+            <Pagination className="mt-4">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} />
+                </PaginationItem>
+                {[...Array(totalPages)].map((_, index) => (
+                  <PaginationItem key={index}>
+                    <PaginationLink
+                      isActive={currentPage === index + 1}
+                      onClick={() => handlePageChange(index + 1)}
+                    >
+                      {index + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                <PaginationItem>
+                  <PaginationNext onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          )}
+        </>
       ) : (
         <p className="text-center text-gray-500">Belum ada barang yang ditambahkan atau tidak ditemukan.</p>
       )}
