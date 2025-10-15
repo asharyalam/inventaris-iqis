@@ -11,6 +11,7 @@ interface UserProfile {
   last_name: string | null;
   instansi: string | null;
   role: string | null;
+  position: string | null; // New: Added position
   avatar_url: string | null;
 }
 
@@ -20,7 +21,7 @@ interface SessionContextType {
   userProfile: UserProfile | null;
   isLoading: boolean;
   isAdmin: boolean;
-  isHeadmaster: boolean; // Added isHeadmaster
+  isHeadmaster: boolean;
 }
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
@@ -63,7 +64,7 @@ export const SessionContextProvider = ({ children }: { children: ReactNode }) =>
       if (user) {
         const { data, error } = await supabase
           .from('profiles')
-          .select('id, first_name, last_name, instansi, role, avatar_url')
+          .select('id, first_name, last_name, instansi, role, position, avatar_url') // New: Added position
           .eq('id', user.id)
           .single();
 
@@ -82,7 +83,7 @@ export const SessionContextProvider = ({ children }: { children: ReactNode }) =>
   }, [user]);
 
   const isAdmin = userProfile?.role === 'Admin';
-  const isHeadmaster = userProfile?.role === 'Kepala Sekolah'; // New headmaster check
+  const isHeadmaster = userProfile?.role === 'Kepala Sekolah';
 
   return (
     <SessionContext.Provider value={{ session, user, userProfile, isLoading, isAdmin, isHeadmaster }}>

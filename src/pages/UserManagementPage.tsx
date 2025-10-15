@@ -17,13 +17,14 @@ interface UserProfile {
   last_name: string | null;
   instansi: string | null;
   role: string | null;
+  position: string | null; // New: Added position
   avatar_url: string | null;
 }
 
 const fetchAllUserProfiles = async (): Promise<UserProfile[]> => {
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, first_name, last_name, instansi, role, avatar_url')
+    .select('id, first_name, last_name, instansi, role, position, avatar_url') // New: Added position
     .order('first_name', { ascending: true });
 
   if (error) {
@@ -40,6 +41,7 @@ const UserManagementPage: React.FC = () => {
   const [lastName, setLastName] = useState('');
   const [instansi, setInstansi] = useState('');
   const [role, setRole] = useState('');
+  const [position, setPosition] = useState(''); // New: State for position
 
   const { data: users, isLoading, error, refetch } = useQuery<UserProfile[], Error>({
     queryKey: ['userProfiles'],
@@ -52,6 +54,7 @@ const UserManagementPage: React.FC = () => {
     setLastName(userProfile.last_name || '');
     setInstansi(userProfile.instansi || '');
     setRole(userProfile.role || 'Pengguna');
+    setPosition(userProfile.position || ''); // New: Set position
     setIsDialogOpen(true);
   };
 
@@ -65,6 +68,7 @@ const UserManagementPage: React.FC = () => {
         last_name: lastName,
         instansi: instansi,
         role: role,
+        position: position, // New: Update position
       })
       .eq('id', editingUser.id);
 
@@ -95,6 +99,7 @@ const UserManagementPage: React.FC = () => {
               <TableHead>Nama Depan</TableHead>
               <TableHead>Nama Belakang</TableHead>
               <TableHead>Instansi</TableHead>
+              <TableHead>Jabatan</TableHead> {/* New: Table header for position */}
               <TableHead>Peran</TableHead>
               <TableHead className="text-right">Aksi</TableHead>
             </TableRow>
@@ -105,6 +110,7 @@ const UserManagementPage: React.FC = () => {
                 <TableCell className="font-medium">{userProfile.first_name || '-'}</TableCell>
                 <TableCell>{userProfile.last_name || '-'}</TableCell>
                 <TableCell>{userProfile.instansi || '-'}</TableCell>
+                <TableCell>{userProfile.position || '-'}</TableCell> {/* New: Display position */}
                 <TableCell>{userProfile.role || 'Pengguna'}</TableCell>
                 <TableCell className="text-right">
                   <Button variant="outline" size="sm" onClick={() => handleEditClick(userProfile)}>
@@ -136,7 +142,23 @@ const UserManagementPage: React.FC = () => {
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="instansi" className="text-right">Instansi</Label>
-                <Input id="instansi" value={instansi} onChange={(e) => setInstansi(e.target.value)} className="col-span-3" />
+                <Select onValueChange={setInstansi} value={instansi}>
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Pilih instansi" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="BPH">BPH</SelectItem>
+                    <SelectItem value="TKIT">TKIT</SelectItem>
+                    <SelectItem value="SDIT">SDIT</SelectItem>
+                    <SelectItem value="SMPIT">SMPIT</SelectItem>
+                    <SelectItem value="SMKIT">SMKIT</SelectItem>
+                    <SelectItem value="BK">BK</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="position" className="text-right">Jabatan</Label> {/* New: Input for position */}
+                <Input id="position" value={position} onChange={(e) => setPosition(e.target.value)} className="col-span-3" />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="role" className="text-right">Peran</Label>
@@ -147,6 +169,7 @@ const UserManagementPage: React.FC = () => {
                   <SelectContent>
                     <SelectItem value="Admin">Admin</SelectItem>
                     <SelectItem value="Pengguna">Pengguna</SelectItem>
+                    <SelectItem value="Kepala Sekolah">Kepala Sekolah</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

@@ -49,6 +49,43 @@ const Login = () => {
           }}
           theme="light"
           redirectTo={window.location.origin} // Redirect to current origin after auth
+          extraSignUpFields={[
+            {
+              name: 'first_name',
+              label: 'Nama Depan',
+              type: 'text',
+              required: true,
+              placeholder: 'Masukkan nama depan Anda',
+            },
+            {
+              name: 'last_name',
+              label: 'Nama Belakang',
+              type: 'text',
+              required: true,
+              placeholder: 'Masukkan nama belakang Anda',
+            },
+            {
+              name: 'instansi',
+              label: 'Instansi',
+              type: 'select',
+              required: true,
+              options: [
+                { value: 'BPH', label: 'BPH' },
+                { value: 'TKIT', label: 'TKIT' },
+                { value: 'SDIT', label: 'SDIT' },
+                { value: 'SMPIT', label: 'SMPIT' },
+                { value: 'SMKIT', label: 'SMKIT' },
+                { value: 'BK', label: 'BK' },
+              ],
+            },
+            {
+              name: 'position', // Using 'position' for 'jabatan'
+              label: 'Jabatan',
+              type: 'text',
+              required: true,
+              placeholder: 'Masukkan jabatan Anda',
+            },
+          ]}
         />
       </div>
     </div>
