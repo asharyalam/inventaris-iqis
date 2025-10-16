@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { useSession } from '@/components/SessionContextProvider';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -96,12 +95,7 @@ const ProfilePage: React.FC = () => {
           <CardTitle className="text-3xl font-bold">Profil Pengguna</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="flex justify-center">
-            <Avatar className="h-24 w-24">
-              <AvatarImage src={userProfile?.avatar_url || "https://github.com/shadcn.png"} alt="Avatar" />
-              <AvatarFallback>{userProfile?.first_name ? userProfile.first_name[0] : 'U'}</AvatarFallback>
-            </Avatar>
-          </div>
+          {/* Menghapus bagian Avatar */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -134,11 +128,6 @@ const ProfilePage: React.FC = () => {
               <Label htmlFor="position">Jabatan</Label>
               <Input id="position" value={userProfile?.position || ''} readOnly />
             </div>
-            {/* Bidang Peran disembunyikan */}
-            {/* <div className="space-y-2">
-              <Label htmlFor="role">Peran</Label>
-              <Input id="role" value={userProfile?.role || 'Pengguna'} readOnly />
-            </div> */}
           </div>
           <div className="flex justify-end mt-6">
             <Button onClick={() => setIsEditDialogOpen(true)}>Edit Profil</Button>
