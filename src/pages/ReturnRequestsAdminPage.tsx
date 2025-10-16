@@ -22,8 +22,10 @@ interface ReturnRequest {
   request_date: string;
   status: string;
   admin_notes: string | null;
+  borrow_request_id: string; // New: Link to the specific borrow request
   items: { name: string };
   profiles: { first_name: string; last_name: string; instansi: string };
+  borrow_requests: { quantity: number; remaining_quantity: number; borrow_start_date: string; due_date: string } | null; // New: Details from the associated borrow request
 }
 
 const fetchAllReturnRequests = async (): Promise<ReturnRequest[]> => {
@@ -37,8 +39,10 @@ const fetchAllReturnRequests = async (): Promise<ReturnRequest[]> => {
       request_date,
       status,
       admin_notes,
+      borrow_request_id,
       items ( name ),
-      profiles ( first_name, last_name, instansi )
+      profiles ( first_name, last_name, instansi ),
+      borrow_requests ( quantity, remaining_quantity, borrow_start_date, due_date )
     `)
     .order('request_date', { ascending: false });
 
@@ -50,7 +54,7 @@ const fetchAllReturnRequests = async (): Promise<ReturnRequest[]> => {
 
 const ReturnRequestsAdminPage: React.FC = () => {
   const queryClient = useQueryClient();
-  const { user, userProfile } = useSession(); // Get userProfile to check roles
+  const { user, userProfile } = useSession();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<ReturnRequest | null>(null);
   const [adminNotes, setAdminNotes] = useState('');
@@ -60,7 +64,7 @@ const ReturnRequestsAdminPage: React.FC = () => {
     queryFn: fetchAllReturnRequests,
   });
 
-  const handleAction = async (status: 'Disetujui' | 'Ditolak') => { // Standardized status options
+  const handleAction = async (status: 'Disetujui' | 'Ditolak') => {
     if (!selectedRequest || !user) return;
 
     const { error: updateError } = await supabase
@@ -77,36 +81,13 @@ const ReturnRequestsAdminPage: React.FC = () => {
       showError(`Gagal memperbarui permintaan: ${updateError.message}`);
     } else {
       showSuccess(`Permintaan pengembalian berhasil ${status === 'Disetujui' ? 'disetujui' : 'ditolak'}!`);
-      // If approved, update item quantity
-      if (status === 'Disetujui') {
-        const { data: itemData, error: itemError } = await supabase
-          .from('items')
-          .select('quantity')
-          .eq('id', selectedRequest.item_id)
-          .single();
-
-        if (itemError) {
-          showError(`Gagal mengambil kuantitas barang: ${itemError.message}`);
-        } else {
-          const newQuantity = itemData.quantity + selectedRequest.quantity;
-          const { error: updateItemError } = await supabase
-            .from('items')
-            .update({ quantity: newQuantity })
-            .eq('id', selectedRequest.item_id);
-
-          if (updateItemError) {
-            showError(`Gagal memperbarui kuantitas barang: ${updateItemError.message}`);
-          } else {
-            showSuccess("Kuantitas barang berhasil diperbarui.");
-            queryClient.invalidateQueries({ queryKey: ['items'] });
-            queryClient.invalidateQueries({ queryKey: ['inventorySummary'] });
-            queryClient.invalidateQueries({ queryKey: ['availableItemsForBorrow'] });
-            queryClient.invalidateQueries({ queryKey: ['allItems'] });
-          }
-        }
-      }
+      
+      // Invalidate queries to reflect changes, item quantity update is handled by trigger
       queryClient.invalidateQueries({ queryKey: ['returnRequests', selectedRequest.user_id] });
-      queryClient.invalidateQueries({ queryKey: ['allTransactions'] });
+      queryClient.invalidateQueries({ queryKey: ['borrowedItemsForReturn', selectedRequest.user_id] }); // Update user's view of what's still borrowed
+      queryClient.invalidateQueries({ queryKey: ['adminBorrowRequests'] }); // Update admin's view of borrow requests (remaining_quantity)
+      queryClient.invalidateQueries({ queryKey: ['allTransactions'] }); // Update monitoring page
+      queryClient.invalidateQueries({ queryKey: ['adminReturnRequests'] }); // Refetch this page's data
       refetch();
       setIsDialogOpen(false);
       setSelectedRequest(null);
@@ -155,7 +136,9 @@ const ReturnRequestsAdminPage: React.FC = () => {
               <TableHead>Barang</TableHead>
               <TableHead>Pengaju</TableHead>
               <TableHead>Instansi</TableHead>
-              <TableHead>Kuantitas</TableHead>
+              <TableHead>Kuantitas Dikembalikan</TableHead>
+              <TableHead>Kuantitas Dipinjam Awal</TableHead>
+              <TableHead>Kuantitas Tersisa</TableHead>
               <TableHead>Tanggal Permintaan</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Aksi</TableHead>
@@ -170,6 +153,8 @@ const ReturnRequestsAdminPage: React.FC = () => {
                   <TableCell>{`${request.profiles?.first_name || ''} ${request.profiles?.last_name || ''}`.trim() || 'N/A'}</TableCell>
                   <TableCell>{request.profiles?.instansi || '-'}</TableCell>
                   <TableCell>{request.quantity}</TableCell>
+                  <TableCell>{request.borrow_requests?.quantity || '-'}</TableCell>
+                  <TableCell>{request.borrow_requests?.remaining_quantity || '-'}</TableCell>
                   <TableCell>{format(new Date(request.request_date), 'dd MMM yyyy HH:mm', { locale: id })}</TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusDisplay.classes}`}>
@@ -177,12 +162,12 @@ const ReturnRequestsAdminPage: React.FC = () => {
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
-                    {isAdmin && request.status === 'Menunggu Persetujuan' && ( // Only Admin can review pending
+                    {isAdmin && request.status === 'Menunggu Persetujuan' && (
                       <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
                         Tinjau
                       </Button>
                     )}
-                    {((isAdmin || isHeadmaster) && request.status !== 'Menunggu Persetujuan') && ( // Both can view details if not pending
+                    {((isAdmin || isHeadmaster) && request.status !== 'Menunggu Persetujuan') && (
                       <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
                         Lihat Detail
                       </Button>
@@ -213,8 +198,16 @@ const ReturnRequestsAdminPage: React.FC = () => {
                 <Input id="user" value={`${selectedRequest.profiles?.first_name || ''} ${selectedRequest.profiles?.last_name || ''}`.trim() || 'N/A'} className="col-span-3" readOnly />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="quantity" className="text-right">Kuantitas</Label>
+                <Label htmlFor="quantity" className="text-right">Kuantitas Dikembalikan</Label>
                 <Input id="quantity" value={selectedRequest.quantity} className="col-span-3" readOnly />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="borrowedQuantity" className="text-right">Kuantitas Dipinjam Awal</Label>
+                <Input id="borrowedQuantity" value={selectedRequest.borrow_requests?.quantity || '-'} className="col-span-3" readOnly />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="remainingQuantity" className="text-right">Kuantitas Tersisa</Label>
+                <Input id="remainingQuantity" value={selectedRequest.borrow_requests?.remaining_quantity || '-'} className="col-span-3" readOnly />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="notes" className="text-right">Catatan Admin</Label>
@@ -224,13 +217,13 @@ const ReturnRequestsAdminPage: React.FC = () => {
                   onChange={(e) => setAdminNotes(e.target.value)}
                   className="col-span-3"
                   placeholder="Tambahkan catatan admin..."
-                  readOnly={selectedRequest.status !== 'Menunggu Persetujuan'} // Only editable if pending
+                  readOnly={selectedRequest.status !== 'Menunggu Persetujuan'}
                 />
               </div>
             </div>
           )}
           <DialogFooter>
-            {isAdmin && selectedRequest?.status === 'Menunggu Persetujuan' && ( // Only Admin can approve/reject
+            {isAdmin && selectedRequest?.status === 'Menunggu Persetujuan' && (
               <>
                 <Button variant="destructive" onClick={() => handleAction('Ditolak')}>Tolak</Button>
                 <Button onClick={() => handleAction('Disetujui')}>Setujui</Button>

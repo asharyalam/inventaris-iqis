@@ -19,9 +19,10 @@ const formSchema = z.object({
 });
 
 interface BorrowedItem {
-  id: string;
+  id: string; // This is the borrow_request_id
   item_id: string;
-  quantity: number;
+  quantity: number; // This is the initial borrowed quantity
+  remaining_quantity: number; // New: quantity still out on loan
   items: { name: string };
 }
 
@@ -32,10 +33,12 @@ const fetchBorrowedItemsForReturn = async (userId: string): Promise<BorrowedItem
       id,
       item_id,
       quantity,
+      remaining_quantity,
       items ( name )
     `)
     .eq('user_id', userId)
-    .eq('status', 'Diserahkan'); // Only show items that are currently 'Diserahkan' (borrowed)
+    .eq('status', 'Diserahkan') // Only show items that are currently 'Diserahkan' (borrowed)
+    .gt('remaining_quantity', 0); // Only show if there's still quantity to return
 
   if (error) {
     throw new Error(error.message);
@@ -76,8 +79,9 @@ const ReturnRequestForm: React.FC = () => {
       return;
     }
 
-    if (values.quantity > selectedBorrowedItem.quantity) {
-      showError(`Kuantitas yang diminta melebihi kuantitas yang dipinjam (${selectedBorrowedItem.quantity}).`);
+    // Validate against remaining_quantity
+    if (values.quantity > selectedBorrowedItem.remaining_quantity) {
+      showError(`Kuantitas yang diminta melebihi kuantitas yang tersisa untuk dikembalikan (${selectedBorrowedItem.remaining_quantity}).`);
       setIsSubmitting(false);
       return;
     }
@@ -86,6 +90,7 @@ const ReturnRequestForm: React.FC = () => {
       item_id: selectedBorrowedItem.item_id,
       user_id: user.id,
       quantity: values.quantity,
+      borrow_request_id: values.borrow_request_id, // New: Link to the specific borrow request
       status: 'Menunggu Persetujuan', // Standardized status
     });
 
@@ -97,6 +102,7 @@ const ReturnRequestForm: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['returnRequests', user.id] });
       queryClient.invalidateQueries({ queryKey: ['borrowedItemsForReturn', user.id] }); // Invalidate to update available quantity
       queryClient.invalidateQueries({ queryKey: ['adminReturnRequests'] }); // Invalidate for Admin view
+      queryClient.invalidateQueries({ queryKey: ['allTransactions'] }); // Invalidate for monitoring
     }
     setIsSubmitting(false);
   };
@@ -127,7 +133,7 @@ const ReturnRequestForm: React.FC = () => {
                 <SelectContent>
                   {borrowedItems?.map((item) => (
                     <SelectItem key={item.id} value={item.id}>
-                      {item.items?.name || 'N/A'} (Kuantitas dipinjam: {item.quantity})
+                      {item.items?.name || 'N/A'} (Tersisa: {item.remaining_quantity})
                     </SelectItem>
                   ))}
                 </SelectContent>

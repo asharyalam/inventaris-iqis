@@ -16,7 +16,9 @@ interface ReturnRequest {
   request_date: string;
   status: string;
   admin_notes: string | null;
+  borrow_request_id: string; // New: Link to the specific borrow request
   items: { name: string };
+  borrow_requests: { quantity: number; remaining_quantity: number; borrow_start_date: string; due_date: string } | null; // New: Details from the associated borrow request
 }
 
 const fetchReturnRequests = async (userId: string): Promise<ReturnRequest[]> => {
@@ -30,7 +32,9 @@ const fetchReturnRequests = async (userId: string): Promise<ReturnRequest[]> => 
       request_date,
       status,
       admin_notes,
-      items ( name )
+      borrow_request_id,
+      items ( name ),
+      borrow_requests ( quantity, remaining_quantity, borrow_start_date, due_date )
     `)
     .eq('user_id', userId)
     .order('request_date', { ascending: false });
@@ -84,7 +88,11 @@ const ReturnRequestList: React.FC = () => {
           <TableHeader>
             <TableRow>
               <TableHead>Barang</TableHead>
-              <TableHead>Kuantitas</TableHead>
+              <TableHead>Kuantitas Dikembalikan</TableHead>
+              <TableHead>Kuantitas Dipinjam Awal</TableHead>
+              <TableHead>Kuantitas Tersisa</TableHead>
+              <TableHead>Tanggal Peminjaman</TableHead>
+              <TableHead>Tanggal Jatuh Tempo</TableHead>
               <TableHead>Tanggal Permintaan</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Catatan Admin</TableHead>
@@ -97,6 +105,14 @@ const ReturnRequestList: React.FC = () => {
                 <TableRow key={request.id}>
                   <TableCell className="font-medium">{request.items?.name || 'N/A'}</TableCell>
                   <TableCell>{request.quantity}</TableCell>
+                  <TableCell>{request.borrow_requests?.quantity || '-'}</TableCell>
+                  <TableCell>{request.borrow_requests?.remaining_quantity || '-'}</TableCell>
+                  <TableCell>
+                    {request.borrow_requests?.borrow_start_date ? format(new Date(request.borrow_requests.borrow_start_date), 'dd MMM yyyy', { locale: id }) : '-'}
+                  </TableCell>
+                  <TableCell>
+                    {request.borrow_requests?.due_date ? format(new Date(request.borrow_requests.due_date), 'dd MMM yyyy', { locale: id }) : '-'}
+                  </TableCell>
                   <TableCell>{format(new Date(request.request_date), 'dd MMM yyyy HH:mm', { locale: id })}</TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusDisplay.classes}`}>
