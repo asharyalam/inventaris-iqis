@@ -23,7 +23,8 @@ import AdminConsumableRequestsPage from "./pages/AdminConsumableRequestsPage";
 import MonitoringReportingPage from "./pages/MonitoringReportingPage";
 import ProfilePage from "./pages/ProfilePage";
 import ReturnRequestsPage from "./pages/ReturnRequestsPage";
-import ForgotPassword from "./pages/ForgotPassword"; // Import the new ForgotPassword page
+import ForgotPassword from "./pages/ForgotPassword";
+import AdminDataManagementPage from "./pages/AdminDataManagementPage"; // Import the new AdminDataManagementPage
 
 const queryClient = new QueryClient();
 
@@ -36,7 +37,7 @@ const App = () => (
         <SessionContextProvider>
           <Routes>
             <Route path="/login" element={<Login />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} /> {/* New Forgot Password Route */}
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
 
             {/* Public/Redirected Route */}
@@ -59,6 +60,7 @@ const App = () => (
                 <Route path="/admin/consumable-requests" element={<AdminConsumableRequestsPage />} />
                 <Route path="/admin/users" element={<UserManagementPage />} />
                 <Route path="/admin/monitoring-reporting" element={<MonitoringReportingPage />} />
+                <Route path="/admin/data-management" element={<AdminDataManagementPage />} /> {/* New Admin Data Management Route */}
               </Route>
             </Route>
 

@@ -3,7 +3,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Package, Handshake, History, PlusCircle } from 'lucide-react';
+import { Users, Package, Handshake, History, PlusCircle, Database } from 'lucide-react'; // Import Database icon
 import { useSession } from '@/components/SessionContextProvider';
 import HeadmasterDashboard from './HeadmasterDashboard';
 
@@ -54,7 +54,7 @@ const AdminDashboard: React.FC = () => {
         <Link to="/admin/borrow-requests">
           <Card className="hover:shadow-lg transition-shadow duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Manajemen Peminjaman Barang</CardTitle> {/* Diperbarui */}
+              <CardTitle className="text-sm font-medium">Manajemen Peminjaman Barang</CardTitle>
               <Handshake className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -67,7 +67,7 @@ const AdminDashboard: React.FC = () => {
         <Link to="/admin/return-requests">
           <Card className="hover:shadow-lg transition-shadow duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Manajemen Pengembalian</CardTitle> {/* Diperbarui */}
+              <CardTitle className="text-sm font-medium">Manajemen Pengembalian</CardTitle>
               <History className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -80,7 +80,7 @@ const AdminDashboard: React.FC = () => {
         <Link to="/admin/consumable-requests">
           <Card className="hover:shadow-lg transition-shadow duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Manajemen Permintaan Barang</CardTitle> {/* Diperbarui */}
+              <CardTitle className="text-sm font-medium">Manajemen Permintaan Barang</CardTitle>
               <Package className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -99,6 +99,20 @@ const AdminDashboard: React.FC = () => {
             <CardContent>
               <p className="text-2xl font-bold">Pengguna</p>
               <p className="text-xs text-muted-foreground">Kelola peran dan profil pengguna.</p>
+            </CardContent>
+          </Card>
+        </Link>
+
+        {/* New Card for Data Management */}
+        <Link to="/admin/data-management">
+          <Card className="hover:shadow-lg transition-shadow duration-200">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Manajemen Data</CardTitle>
+              <Database className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold">Hapus Aktivitas</p>
+              <p className="text-xs text-muted-foreground">Hapus semua riwayat permintaan.</p>
             </CardContent>
           </Card>
         </Link>

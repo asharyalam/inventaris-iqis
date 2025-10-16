@@ -6,7 +6,7 @@ import { useSession } from '@/components/SessionContextProvider';
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Home, Package, Handshake, History, Users, PlusCircle, LogOut, Menu, User as UserIcon, BarChart3, RotateCcw } from 'lucide-react';
+import { Home, Package, Handshake, History, Users, PlusCircle, LogOut, Menu, User as UserIcon, BarChart3, RotateCcw, Database } from 'lucide-react'; // Import Database icon
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
@@ -29,10 +29,11 @@ const navItems: NavItem[] = [
   { title: "Manajemen Barang", href: "/admin/items", icon: Package, roles: ["Admin"] },
   { title: "Tambah Barang Baru", href: "/admin/add-item", icon: PlusCircle, roles: ["Admin"] },
   { title: "Manajemen Peminjaman", href: "/admin/borrow-requests", icon: Handshake, roles: ["Admin", "Kepala Sekolah"] },
-  { title: "Manajemen Pengembalian", href: "/admin/return-requests", icon: RotateCcw, roles: ["Admin"] }, // Removed Kepala Sekolah role
+  { title: "Manajemen Pengembalian", href: "/admin/return-requests", icon: RotateCcw, roles: ["Admin"] },
   { title: "Manajemen Permintaan", href: "/admin/consumable-requests", icon: Package, roles: ["Admin", "Kepala Sekolah"] },
   { title: "Manajemen Pengguna", href: "/admin/users", icon: Users, roles: ["Admin"] },
   { title: "Pemantauan & Pelaporan", href: "/admin/monitoring-reporting", icon: BarChart3, roles: ["Kepala Sekolah"] },
+  { title: "Manajemen Data", href: "/admin/data-management", icon: Database, roles: ["Admin"] }, // New nav item for Admin
 ];
 
 const SidebarContent: React.FC<{ userRole: string | null; closeSheet?: () => void }> = ({ userRole, closeSheet }) => {
