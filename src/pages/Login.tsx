@@ -41,6 +41,9 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 p-10 bg-white rounded-xl shadow-lg">
+        <div className="flex justify-center mb-6">
+          <img src="/favicon.png" alt="Logo Aplikasi" className="h-24 w-24 object-contain" />
+        </div>
         <Tabs defaultValue="login" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="login">Masuk</TabsTrigger>
@@ -50,7 +53,7 @@ const Login = () => {
             <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
               Masuk ke Akun Anda
             </h2>
-            <LoginForm /> {/* Use the new custom LoginForm */}
+            <LoginForm />
           </TabsContent>
           <TabsContent value="signup">
             <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
