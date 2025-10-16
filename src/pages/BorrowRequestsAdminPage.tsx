@@ -159,10 +159,42 @@ const BorrowRequestsAdminPage: React.FC = () => {
     }
   };
 
-  const openDialog = (request: BorrowRequest) => {
-    setSelectedRequest(request);
-    setAdminNotes(request.admin_notes || '');
-    setIsDialogOpen(true);
+  const openDialog = async (request: BorrowRequest) => {
+    // Fetch the latest state of this specific request from the database
+    const { data, error } = await supabase
+      .from('borrow_requests')
+      .select(`
+        id,
+        item_id,
+        user_id,
+        quantity,
+        request_date,
+        due_date,
+        borrow_start_date,
+        status,
+        admin_notes,
+        approved_by,
+        approval_date,
+        returned_date,
+        returned_by,
+        items ( name ),
+        profiles ( first_name, last_name, instansi )
+      `)
+      .eq('id', request.id)
+      .single();
+
+    if (error) {
+      showError(`Gagal memuat detail permintaan: ${error.message}`);
+      return;
+    }
+
+    if (data) {
+      setSelectedRequest(data as BorrowRequest);
+      setAdminNotes(data.admin_notes || '');
+      setIsDialogOpen(true);
+    } else {
+      showError("Permintaan tidak ditemukan.");
+    }
   };
 
   if (isLoading) {
@@ -239,12 +271,12 @@ const BorrowRequestsAdminPage: React.FC = () => {
                         Proses
                       </Button>
                     )}
-                    {isAdmin && request.status === 'Diserahkan' && ( // Changed from 'Diproses'
+                    {isAdmin && request.status === 'Diserahkan' && (
                       <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
                         Proses Pengembalian
                       </Button>
                     )}
-                    {((isHeadmaster && request.status !== 'Menunggu Persetujuan') || (isAdmin && request.status !== 'Disetujui' && request.status !== 'Diserahkan')) && ( // Changed from 'Diproses'
+                    {((isHeadmaster && request.status !== 'Menunggu Persetujuan') || (isAdmin && request.status !== 'Disetujui' && request.status !== 'Diserahkan')) && (
                       <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
                         Lihat Detail
                       </Button>
@@ -300,7 +332,7 @@ const BorrowRequestsAdminPage: React.FC = () => {
                   onChange={(e) => setAdminNotes(e.target.value)}
                   className="col-span-3"
                   placeholder="Tambahkan catatan admin..."
-                  readOnly={selectedRequest.status !== 'Menunggu Persetujuan' && selectedRequest.status !== 'Disetujui' && selectedRequest.status !== 'Diserahkan'} // Changed from 'Diproses'
+                  readOnly={selectedRequest.status !== 'Menunggu Persetujuan' && selectedRequest.status !== 'Disetujui' && selectedRequest.status !== 'Diserahkan'}
                 />
               </div>
             </div>
@@ -318,7 +350,7 @@ const BorrowRequestsAdminPage: React.FC = () => {
                 <Button onClick={() => handleAction('handover')}>Proses</Button>
               </>
             )}
-            {isAdmin && selectedRequest?.status === 'Diserahkan' && ( // Changed from 'Diproses'
+            {isAdmin && selectedRequest?.status === 'Diserahkan' && (
               <>
                 <Button variant="destructive" onClick={() => handleAction('reject')}>Tolak</Button>
                 <Button onClick={() => handleAction('return')}>Proses Pengembalian</Button>
