@@ -6,7 +6,7 @@ import { useSession } from '@/components/SessionContextProvider';
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Home, Package, Handshake, History, Users, PlusCircle, LogOut, Menu, User as UserIcon, BarChart3, RotateCcw, Database } from 'lucide-react'; // Import Database icon
+import { Home, Package, Handshake, History, Users, PlusCircle, LogOut, Menu, User as UserIcon, BarChart3, RotateCcw, Database } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
@@ -33,7 +33,7 @@ const navItems: NavItem[] = [
   { title: "Manajemen Permintaan", href: "/admin/consumable-requests", icon: Package, roles: ["Admin", "Kepala Sekolah"] },
   { title: "Manajemen Pengguna", href: "/admin/users", icon: Users, roles: ["Admin"] },
   { title: "Pemantauan & Pelaporan", href: "/admin/monitoring-reporting", icon: BarChart3, roles: ["Kepala Sekolah"] },
-  { title: "Manajemen Data", href: "/admin/data-management", icon: Database, roles: ["Admin"] }, // New nav item for Admin
+  { title: "Manajemen Data", href: "/admin/data-management", icon: Database, roles: ["Admin"] },
 ];
 
 const SidebarContent: React.FC<{ userRole: string | null; closeSheet?: () => void }> = ({ userRole, closeSheet }) => {
@@ -110,7 +110,7 @@ const AppLayout: React.FC = () => {
           <div className="flex h-full max-h-screen flex-col gap-2">
             <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
               <Link to={canAccessAdminDashboard ? "/admin/dashboard" : "/dashboard"} className="flex items-center gap-2 font-semibold">
-                <Package className="h-6 w-6" />
+                <img src="/favicon.png" alt="Logo Aplikasi" className="h-6 w-6 object-contain" />
                 <span>Inventaris IQIS</span>
               </Link>
             </div>
@@ -145,7 +145,7 @@ const AppLayout: React.FC = () => {
               <SheetContent side="left" className="flex flex-col w-[280px] sm:w-[320px]">
                 <nav className="grid gap-2 text-lg font-medium">
                   <Link to={canAccessAdminDashboard ? "/admin/dashboard" : "/dashboard"} className="flex items-center gap-2 text-lg font-semibold mb-4">
-                    <Package className="h-6 w-6" />
+                    <img src="/favicon.png" alt="Logo Aplikasi" className="h-6 w-6 object-contain" />
                     <span>Inventaris IQIS</span>
                   </Link>
                   <SidebarContent userRole={userRole} closeSheet={() => setIsSheetOpen(false)} />
