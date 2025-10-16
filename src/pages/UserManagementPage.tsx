@@ -6,7 +6,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { showSuccess, showError } from '@/utils/toast';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"; // Import DialogDescription
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -18,24 +18,40 @@ interface UserProfile {
   instansi: string | null;
   role: string | null;
   avatar_url: string | null;
+  email: string; // Add email to UserProfile for reset password
 }
 
 const fetchAllUserProfiles = async (): Promise<UserProfile[]> => {
+  // Fetch profiles and join with auth.users to get email
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, first_name, last_name, instansi, role, avatar_url')
+    .select(`
+      id,
+      first_name,
+      last_name,
+      instansi,
+      role,
+      avatar_url,
+      auth_users:auth.users(email)
+    `)
     .order('first_name', { ascending: true });
 
   if (error) {
     throw new Error(error.message);
   }
-  return data || [];
+  // Map data to include email directly in UserProfile
+  return data.map(profile => ({
+    ...profile,
+    email: profile.auth_users?.email || 'N/A',
+  })) || [];
 };
 
 const UserManagementPage: React.FC = () => {
   const queryClient = useQueryClient();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isResetPasswordDialogOpen, setIsResetPasswordDialogOpen] = useState(false); // New state for reset password dialog
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
+  const [userToResetPassword, setUserToResetPassword] = useState<UserProfile | null>(null); // New state for user whose password will be reset
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [instansi, setInstansi] = useState('');
@@ -52,7 +68,7 @@ const UserManagementPage: React.FC = () => {
     setLastName(userProfile.last_name || '');
     setInstansi(userProfile.instansi || '');
     setRole(userProfile.role || 'Pengguna');
-    setIsDialogOpen(true);
+    setIsEditDialogOpen(true);
   };
 
   const handleSave = async () => {
@@ -73,10 +89,30 @@ const UserManagementPage: React.FC = () => {
     } else {
       showSuccess("Profil pengguna berhasil diperbarui!");
       refetch(); // Muat ulang daftar semua pengguna
-      // Batalkan kueri profil pengguna spesifik untuk memastikan SessionContextProvider mendapatkan peran terbaru
       queryClient.invalidateQueries({ queryKey: ['userProfile', editingUser.id] });
-      setIsDialogOpen(false);
+      setIsEditDialogOpen(false);
     }
+  };
+
+  const handleResetPasswordClick = (userProfile: UserProfile) => {
+    setUserToResetPassword(userProfile);
+    setIsResetPasswordDialogOpen(true);
+  };
+
+  const confirmResetPassword = async () => {
+    if (!userToResetPassword) return;
+
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(userToResetPassword.email, {
+      redirectTo: `${window.location.origin}/login?reset=true`, // Redirect to login after reset request
+    });
+
+    if (resetError) {
+      showError(`Gagal mengirim tautan reset kata sandi ke ${userToResetPassword.email}: ${resetError.message}`);
+    } else {
+      showSuccess(`Tautan reset kata sandi telah dikirim ke email ${userToResetPassword.email}.`);
+    }
+    setIsResetPasswordDialogOpen(false);
+    setUserToResetPassword(null);
   };
 
   if (isLoading) {
@@ -96,6 +132,7 @@ const UserManagementPage: React.FC = () => {
             <TableRow>
               <TableHead>Nama Depan</TableHead>
               <TableHead>Nama Belakang</TableHead>
+              <TableHead>Email</TableHead> {/* Display email */}
               <TableHead>Instansi</TableHead>
               <TableHead>Peran</TableHead>
               <TableHead className="text-right">Aksi</TableHead>
@@ -106,11 +143,15 @@ const UserManagementPage: React.FC = () => {
               <TableRow key={userProfile.id}>
                 <TableCell className="font-medium">{userProfile.first_name || '-'}</TableCell>
                 <TableCell>{userProfile.last_name || '-'}</TableCell>
+                <TableCell>{userProfile.email || '-'}</TableCell> {/* Display email */}
                 <TableCell>{userProfile.instansi || '-'}</TableCell>
                 <TableCell>{userProfile.role || 'Pengguna'}</TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-right space-x-2">
                   <Button variant="outline" size="sm" onClick={() => handleEditClick(userProfile)}>
                     Edit
+                  </Button>
+                  <Button variant="secondary" size="sm" onClick={() => handleResetPasswordClick(userProfile)}>
+                    Reset Kata Sandi
                   </Button>
                 </TableCell>
               </TableRow>
@@ -121,7 +162,8 @@ const UserManagementPage: React.FC = () => {
         <p className="text-center text-gray-500">Tidak ada pengguna yang ditemukan.</p>
       )}
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      {/* Edit User Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Edit Profil Pengguna</DialogTitle>
@@ -157,6 +199,23 @@ const UserManagementPage: React.FC = () => {
           )}
           <DialogFooter>
             <Button onClick={handleSave}>Simpan Perubahan</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Password Confirmation Dialog */}
+      <Dialog open={isResetPasswordDialogOpen} onOpenChange={setIsResetPasswordDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Konfirmasi Reset Kata Sandi</DialogTitle>
+            <DialogDescription>
+              Apakah Anda yakin ingin mengirim tautan reset kata sandi ke {userToResetPassword?.email}?
+              Pengguna akan menerima email untuk mengatur ulang kata sandi mereka.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsResetPasswordDialogOpen(false)}>Batal</Button>
+            <Button variant="destructive" onClick={confirmResetPassword}>Kirim Tautan Reset</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

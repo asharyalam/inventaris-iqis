@@ -4,24 +4,36 @@ import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '@/integrations/supabase/client';
 import { useSession } from '@/components/SessionContextProvider';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom'; // Import Link
 import { useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SignUpForm from '@/components/SignUpForm'; // Import the new sign-up form
+import { showSuccess } from '@/utils/toast'; // Import showSuccess
 
 const Login = () => {
-  const { session, isLoading, canAccessAdminDashboard } = useSession(); // Menggunakan canAccessAdminDashboard
+  const { session, isLoading, canAccessAdminDashboard } = useSession();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!isLoading && session) {
-      if (canAccessAdminDashboard) { // Mengarahkan Admin dan Kepala Sekolah ke /admin/dashboard
+      if (canAccessAdminDashboard) {
         navigate('/admin/dashboard', { replace: true });
       } else {
         navigate('/dashboard', { replace: true });
       }
     }
-  }, [session, isLoading, canAccessAdminDashboard, navigate]); // Menambahkan canAccessAdminDashboard ke dependencies
+  }, [session, isLoading, canAccessAdminDashboard, navigate]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('reset') === 'true') {
+      showSuccess("Kata sandi Anda berhasil direset. Silakan masuk dengan kata sandi baru Anda.");
+      // Clear the query parameter to prevent showing the toast again on refresh
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete('reset');
+      window.history.replaceState({}, document.title, newUrl.toString());
+    }
+  }, []);
 
   if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center">Memuat...</div>;
@@ -54,8 +66,13 @@ const Login = () => {
                 },
               }}
               theme="light"
-              redirectTo={window.location.origin} // Redirect to current origin after auth
+              redirectTo={window.location.origin}
             />
+            <div className="mt-4 text-center text-sm">
+              <Link to="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
+                Lupa kata sandi?
+              </Link>
+            </div>
           </TabsContent>
           <TabsContent value="signup">
             <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">

@@ -22,7 +22,8 @@ import AppLayout from "./components/AppLayout";
 import AdminConsumableRequestsPage from "./pages/AdminConsumableRequestsPage";
 import MonitoringReportingPage from "./pages/MonitoringReportingPage";
 import ProfilePage from "./pages/ProfilePage";
-import ReturnRequestsPage from "./pages/ReturnRequestsPage"; // Import the new ReturnRequestsPage
+import ReturnRequestsPage from "./pages/ReturnRequestsPage";
+import ForgotPassword from "./pages/ForgotPassword"; // Import the new ForgotPassword page
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,7 @@ const App = () => (
         <SessionContextProvider>
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} /> {/* New Forgot Password Route */}
             <Route path="/unauthorized" element={<Unauthorized />} />
 
             {/* Public/Redirected Route */}
@@ -47,7 +49,7 @@ const App = () => (
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/consumable-requests" element={<ConsumableRequestsPage />} />
                 <Route path="/borrow-requests" element={<BorrowRequestsPage />} />
-                <Route path="/return-requests" element={<ReturnRequestsPage />} /> {/* New Return Page Route */}
+                <Route path="/return-requests" element={<ReturnRequestsPage />} />
                 {/* Admin/Headmaster specific routes */}
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                 <Route path="/admin/items" element={<ItemList />} />
