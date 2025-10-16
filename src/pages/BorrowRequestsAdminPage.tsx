@@ -240,6 +240,7 @@ const BorrowRequestsAdminPage: React.FC = () => {
               <TableHead>Kuantitas</TableHead>
               <TableHead>Tanggal Peminjaman</TableHead>
               <TableHead>Tanggal Jatuh Tempo</TableHead>
+              <TableHead>Tanggal Dikembalikan</TableHead> {/* New Table Head */}
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Aksi</TableHead>
             </TableRow>
@@ -255,6 +256,9 @@ const BorrowRequestsAdminPage: React.FC = () => {
                   <TableCell>{request.quantity}</TableCell>
                   <TableCell>{format(new Date(request.borrow_start_date), 'dd MMM yyyy', { locale: id })}</TableCell>
                   <TableCell>{format(new Date(request.due_date), 'dd MMM yyyy', { locale: id })}</TableCell>
+                  <TableCell> {/* New Table Cell */}
+                    {request.returned_date ? format(new Date(request.returned_date), 'dd MMM yyyy', { locale: id }) : '-'}
+                  </TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusDisplay.classes}`}>
                       {statusDisplay.text}
