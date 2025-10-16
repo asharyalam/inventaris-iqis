@@ -193,9 +193,9 @@ const MonitoringReportingPage: React.FC = () => {
                   <TableHead>Pengaju</TableHead>
                   <TableHead>Instansi</TableHead>
                   <TableHead>Kuantitas</TableHead>
-                  <TableHead>Tgl Peminjaman</TableHead>
-                  <TableHead>Tgl Jatuh Tempo</TableHead>
-                  <TableHead>Tgl Dikembalikan</TableHead>
+                  <TableHead>Tanggal Peminjaman</TableHead>
+                  <TableHead>Tanggal Jatuh Tempo</TableHead>
+                  <TableHead>Tanggal Dikembalikan</TableHead>
                   <TableHead>Status</TableHead>
                 </TableRow>
               </TableHeader>

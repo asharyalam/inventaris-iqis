@@ -206,7 +206,7 @@ const BorrowRequestForm: React.FC = () => {
           name="due_date"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>Tanggal Pengembalian</FormLabel>
+              <FormLabel>Tanggal Jatuh Tempo</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -220,7 +220,7 @@ const BorrowRequestForm: React.FC = () => {
                       {field.value ? (
                         format(field.value, "PPP")
                       ) : (
-                        <span>Pilih tanggal pengembalian</span>
+                        <span>Pilih tanggal jatuh tempo</span>
                       )}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>

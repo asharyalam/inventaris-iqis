@@ -206,8 +206,8 @@ const BorrowRequestsAdminPage: React.FC = () => {
               <TableHead>Peminjam</TableHead>
               <TableHead>Instansi</TableHead>
               <TableHead>Kuantitas</TableHead>
-              <TableHead>Tgl Peminjaman</TableHead>
-              <TableHead>Tgl Jatuh Tempo</TableHead>
+              <TableHead>Tanggal Peminjaman</TableHead>
+              <TableHead>Tanggal Jatuh Tempo</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Aksi</TableHead>
             </TableRow>

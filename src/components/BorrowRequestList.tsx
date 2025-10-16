@@ -96,10 +96,10 @@ const BorrowRequestList: React.FC = () => {
             <TableRow>
               <TableHead>Barang</TableHead>
               <TableHead>Kuantitas</TableHead>
-              <TableHead>Tgl Permintaan</TableHead>
-              <TableHead>Tgl Peminjaman</TableHead>
-              <TableHead>Tgl Pengembalian</TableHead>
-              <TableHead>Tgl Dikembalikan</TableHead>
+              <TableHead>Tanggal Permintaan</TableHead>
+              <TableHead>Tanggal Peminjaman</TableHead>
+              <TableHead>Tanggal Jatuh Tempo</TableHead>
+              <TableHead>Tanggal Dikembalikan</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Catatan Admin</TableHead>
             </TableRow>
