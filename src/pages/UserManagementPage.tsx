@@ -6,10 +6,11 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { showSuccess, showError } from '@/utils/toast';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"; // Import DialogDescription
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useSession } from '@/components/SessionContextProvider';
 
 interface UserProfile {
   id: string;
@@ -18,12 +19,11 @@ interface UserProfile {
   instansi: string | null;
   role: string | null;
   avatar_url: string | null;
-  email: string; // Now fetched directly from profiles table
+  email: string;
   position: string | null;
 }
 
 const fetchAllUserProfiles = async (): Promise<UserProfile[]> => {
-  // Fetch profiles including the new email column
   const { data, error } = await supabase
     .from('profiles')
     .select(`
@@ -46,15 +46,19 @@ const fetchAllUserProfiles = async (): Promise<UserProfile[]> => {
 
 const UserManagementPage: React.FC = () => {
   const queryClient = useQueryClient();
+  const { user: currentUser, isAdmin } = useSession(); // Get current logged-in user and their admin status
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isResetPasswordDialogOpen, setIsResetPasswordDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // New state for delete dialog
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
   const [userToResetPassword, setUserToResetPassword] = useState<UserProfile | null>(null);
+  const [userToDelete, setUserToDelete] = useState<UserProfile | null>(null); // New state for user to delete
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [instansi, setInstansi] = useState('');
   const [role, setRole] = useState('');
   const [position, setPosition] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false); // For general submission state
 
   const { data: users, isLoading, error, refetch } = useQuery<UserProfile[], Error>({
     queryKey: ['userProfiles'],
@@ -73,6 +77,7 @@ const UserManagementPage: React.FC = () => {
 
   const handleSave = async () => {
     if (!editingUser) return;
+    setIsSubmitting(true);
 
     const { error: updateError } = await supabase
       .from('profiles')
@@ -93,6 +98,7 @@ const UserManagementPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['userProfile', editingUser.id] });
       setIsEditDialogOpen(false);
     }
+    setIsSubmitting(false);
   };
 
   const handleResetPasswordClick = (userProfile: UserProfile) => {
@@ -102,6 +108,7 @@ const UserManagementPage: React.FC = () => {
 
   const confirmResetPassword = async () => {
     if (!userToResetPassword) return;
+    setIsSubmitting(true);
 
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(userToResetPassword.email, {
       redirectTo: `${window.location.origin}/login?reset=true`,
@@ -114,6 +121,52 @@ const UserManagementPage: React.FC = () => {
     }
     setIsResetPasswordDialogOpen(false);
     setUserToResetPassword(null);
+    setIsSubmitting(false);
+  };
+
+  const handleDeleteClick = (userProfile: UserProfile) => {
+    setUserToDelete(userProfile);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteUser = async () => {
+    if (!userToDelete || !currentUser) return;
+    setIsSubmitting(true);
+
+    if (userToDelete.id === currentUser.id) {
+      showError("Anda tidak dapat menghapus akun Anda sendiri.");
+      setIsSubmitting(false);
+      setIsDeleteDialogOpen(false);
+      return;
+    }
+
+    try {
+      // Call the Edge Function to delete the user
+      const { data, error: edgeFunctionError } = await supabase.functions.invoke('delete-user', {
+        body: JSON.stringify({ userIdToDelete: userToDelete.id }),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${await supabase.auth.getSession().then(res => res.data.session?.access_token)}`,
+        },
+      });
+
+      if (edgeFunctionError) {
+        throw new Error(edgeFunctionError.message);
+      }
+      
+      if (data && data.error) {
+        throw new Error(data.error);
+      }
+
+      showSuccess(`Pengguna ${userToDelete.first_name} ${userToDelete.last_name} berhasil dihapus.`);
+      refetch(); // Refetch user list
+      setIsDeleteDialogOpen(false);
+      setUserToDelete(null);
+    } catch (error: any) {
+      showError(`Gagal menghapus pengguna: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isLoading) {
@@ -156,6 +209,11 @@ const UserManagementPage: React.FC = () => {
                   <Button variant="secondary" size="sm" onClick={() => handleResetPasswordClick(userProfile)}>
                     Reset Kata Sandi
                   </Button>
+                  {isAdmin && userProfile.id !== currentUser?.id && ( // Only show delete button for Admins and not for their own account
+                    <Button variant="destructive" size="sm" onClick={() => handleDeleteClick(userProfile)}>
+                      Hapus
+                    </Button>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
@@ -205,7 +263,9 @@ const UserManagementPage: React.FC = () => {
             </div>
           )}
           <DialogFooter>
-            <Button onClick={handleSave}>Simpan Perubahan</Button>
+            <Button onClick={handleSave} disabled={isSubmitting}>
+              {isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -221,8 +281,29 @@ const UserManagementPage: React.FC = () => {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsResetPasswordDialogOpen(false)}>Batal</Button>
-            <Button variant="destructive" onClick={confirmResetPassword}>Kirim Tautan Reset</Button>
+            <Button variant="outline" onClick={() => setIsResetPasswordDialogOpen(false)} disabled={isSubmitting}>Batal</Button>
+            <Button variant="destructive" onClick={confirmResetPassword} disabled={isSubmitting}>
+              {isSubmitting ? 'Mengirim...' : 'Kirim Tautan Reset'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete User Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Konfirmasi Hapus Pengguna</DialogTitle>
+            <DialogDescription>
+              Apakah Anda yakin ingin menghapus pengguna "{userToDelete?.first_name} {userToDelete?.last_name}" ({userToDelete?.email})?
+              Tindakan ini tidak dapat dibatalkan dan akan menghapus semua data terkait pengguna ini.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)} disabled={isSubmitting}>Batal</Button>
+            <Button variant="destructive" onClick={confirmDeleteUser} disabled={isSubmitting}>
+              {isSubmitting ? 'Menghapus...' : 'Hapus Pengguna'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
