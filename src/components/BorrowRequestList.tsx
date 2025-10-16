@@ -77,7 +77,7 @@ const BorrowRequestList: React.FC = () => {
         return { text: 'Disetujui', classes: 'bg-blue-100 text-blue-800' };
       case 'Diproses': // Old status, will be replaced by 'Diserahkan'
       case 'Diserahkan':
-        return { text: 'Diterima', classes: 'bg-green-100 text-green-800' }; // Changed to 'Diterima'
+        return { text: 'Diserahkan', classes: 'bg-green-100 text-green-800' }; // Dikembalikan ke 'Diserahkan'
       case 'Dikembalikan':
         return { text: 'Dikembalikan', classes: 'bg-purple-100 text-purple-800' };
       case 'Ditolak':
