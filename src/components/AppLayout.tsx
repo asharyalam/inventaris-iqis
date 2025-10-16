@@ -29,7 +29,7 @@ const navItems: NavItem[] = [
   { title: "Manajemen Barang", href: "/admin/items", icon: Package, roles: ["Admin"] },
   { title: "Tambah Barang Baru", href: "/admin/add-item", icon: PlusCircle, roles: ["Admin"] },
   { title: "Manajemen Peminjaman", href: "/admin/borrow-requests", icon: Handshake, roles: ["Admin", "Kepala Sekolah"] },
-  { title: "Manajemen Pengembalian", href: "/admin/return-requests", icon: RotateCcw, roles: ["Admin", "Kepala Sekolah"] }, // Added Kepala Sekolah role
+  { title: "Manajemen Pengembalian", href: "/admin/return-requests", icon: RotateCcw, roles: ["Admin"] }, // Removed Kepala Sekolah role
   { title: "Manajemen Permintaan", href: "/admin/consumable-requests", icon: Package, roles: ["Admin", "Kepala Sekolah"] },
   { title: "Manajemen Pengguna", href: "/admin/users", icon: Users, roles: ["Admin"] },
   { title: "Pemantauan & Pelaporan", href: "/admin/monitoring-reporting", icon: BarChart3, roles: ["Kepala Sekolah"] },

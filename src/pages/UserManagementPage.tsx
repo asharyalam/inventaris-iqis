@@ -18,12 +18,12 @@ interface UserProfile {
   instansi: string | null;
   role: string | null;
   avatar_url: string | null;
-  email: string; // Add email to UserProfile for reset password
-  position: string | null; // Added position
+  email: string; // Now fetched directly from profiles table
+  position: string | null;
 }
 
 const fetchAllUserProfiles = async (): Promise<UserProfile[]> => {
-  // Fetch profiles and join with auth.users to get email
+  // Fetch profiles including the new email column
   const { data, error } = await supabase
     .from('profiles')
     .select(`
@@ -33,32 +33,28 @@ const fetchAllUserProfiles = async (): Promise<UserProfile[]> => {
       instansi,
       role,
       avatar_url,
-      position, -- Added position
-      auth_users:auth.users(email)
+      position,
+      email
     `)
     .order('first_name', { ascending: true });
 
   if (error) {
     throw new Error(error.message);
   }
-  // Map data to include email directly in UserProfile
-  return data.map(profile => ({
-    ...profile,
-    email: profile.auth_users?.email || 'N/A',
-  })) || [];
+  return data || [];
 };
 
 const UserManagementPage: React.FC = () => {
   const queryClient = useQueryClient();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isResetPasswordDialogOpen, setIsResetPasswordDialogOpen] = useState(false); // New state for reset password dialog
+  const [isResetPasswordDialogOpen, setIsResetPasswordDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
-  const [userToResetPassword, setUserToResetPassword] = useState<UserProfile | null>(null); // New state for user whose password will be reset
+  const [userToResetPassword, setUserToResetPassword] = useState<UserProfile | null>(null);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [instansi, setInstansi] = useState('');
   const [role, setRole] = useState('');
-  const [position, setPosition] = useState(''); // New state for position
+  const [position, setPosition] = useState('');
 
   const { data: users, isLoading, error, refetch } = useQuery<UserProfile[], Error>({
     queryKey: ['userProfiles'],
@@ -71,7 +67,7 @@ const UserManagementPage: React.FC = () => {
     setLastName(userProfile.last_name || '');
     setInstansi(userProfile.instansi || '');
     setRole(userProfile.role || 'Pengguna');
-    setPosition(userProfile.position || ''); // Set position
+    setPosition(userProfile.position || '');
     setIsEditDialogOpen(true);
   };
 
@@ -85,7 +81,7 @@ const UserManagementPage: React.FC = () => {
         last_name: lastName,
         instansi: instansi,
         role: role,
-        position: position, // Update position
+        position: position,
       })
       .eq('id', editingUser.id);
 
@@ -93,7 +89,7 @@ const UserManagementPage: React.FC = () => {
       showError(`Gagal memperbarui profil pengguna: ${updateError.message}`);
     } else {
       showSuccess("Profil pengguna berhasil diperbarui!");
-      refetch(); // Muat ulang daftar semua pengguna
+      refetch();
       queryClient.invalidateQueries({ queryKey: ['userProfile', editingUser.id] });
       setIsEditDialogOpen(false);
     }
@@ -108,7 +104,7 @@ const UserManagementPage: React.FC = () => {
     if (!userToResetPassword) return;
 
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(userToResetPassword.email, {
-      redirectTo: `${window.location.origin}/login?reset=true`, // Redirect to login after reset request
+      redirectTo: `${window.location.origin}/login?reset=true`,
     });
 
     if (resetError) {
@@ -139,7 +135,7 @@ const UserManagementPage: React.FC = () => {
               <TableHead>Nama Belakang</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Instansi</TableHead>
-              <TableHead>Jabatan</TableHead> {/* New Table Head */}
+              <TableHead>Jabatan</TableHead>
               <TableHead>Peran</TableHead>
               <TableHead className="text-right">Aksi</TableHead>
             </TableRow>
@@ -151,7 +147,7 @@ const UserManagementPage: React.FC = () => {
                 <TableCell>{userProfile.last_name || '-'}</TableCell>
                 <TableCell>{userProfile.email || '-'}</TableCell>
                 <TableCell>{userProfile.instansi || '-'}</TableCell>
-                <TableCell>{userProfile.position || '-'}</TableCell> {/* Display position */}
+                <TableCell>{userProfile.position || '-'}</TableCell>
                 <TableCell>{userProfile.role || 'Pengguna'}</TableCell>
                 <TableCell className="text-right space-x-2">
                   <Button variant="outline" size="sm" onClick={() => handleEditClick(userProfile)}>
@@ -190,7 +186,7 @@ const UserManagementPage: React.FC = () => {
                 <Input id="instansi" value={instansi} onChange={(e) => setInstansi(e.target.value)} className="col-span-3" />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="position" className="text-right">Jabatan</Label> {/* New Input Field */}
+                <Label htmlFor="position" className="text-right">Jabatan</Label>
                 <Input id="position" value={position} onChange={(e) => setPosition(e.target.value)} className="col-span-3" />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">

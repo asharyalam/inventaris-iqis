@@ -177,12 +177,12 @@ const ReturnRequestsAdminPage: React.FC = () => {
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
-                    {(isAdmin || isHeadmaster) && request.status === 'Menunggu Persetujuan' && (
+                    {isAdmin && request.status === 'Menunggu Persetujuan' && ( // Only Admin can review pending
                       <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
                         Tinjau
                       </Button>
                     )}
-                    {((isAdmin || isHeadmaster) && request.status !== 'Menunggu Persetujuan') && (
+                    {((isAdmin || isHeadmaster) && request.status !== 'Menunggu Persetujuan') && ( // Both can view details if not pending
                       <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
                         Lihat Detail
                       </Button>
@@ -230,7 +230,7 @@ const ReturnRequestsAdminPage: React.FC = () => {
             </div>
           )}
           <DialogFooter>
-            {(isAdmin || isHeadmaster) && selectedRequest?.status === 'Menunggu Persetujuan' && (
+            {isAdmin && selectedRequest?.status === 'Menunggu Persetujuan' && ( // Only Admin can approve/reject
               <>
                 <Button variant="destructive" onClick={() => handleAction('Ditolak')}>Tolak</Button>
                 <Button onClick={() => handleAction('Disetujui')}>Setujui</Button>
