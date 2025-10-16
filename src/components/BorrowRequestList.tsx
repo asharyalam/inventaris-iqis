@@ -77,7 +77,7 @@ const BorrowRequestList: React.FC = () => {
         return { text: 'Disetujui', classes: 'bg-blue-100 text-blue-800' };
       case 'Diproses': // Old status, will be replaced by 'Diserahkan'
       case 'Diserahkan':
-        return { text: 'Diserahkan', classes: 'bg-green-100 text-green-800' };
+        return { text: 'Diterima', classes: 'bg-green-100 text-green-800' }; // Changed to 'Diterima'
       case 'Dikembalikan':
         return { text: 'Dikembalikan', classes: 'bg-purple-100 text-purple-800' };
       case 'Ditolak':
@@ -101,7 +101,6 @@ const BorrowRequestList: React.FC = () => {
               <TableHead>Tanggal Jatuh Tempo</TableHead>
               <TableHead>Tanggal Dikembalikan</TableHead>
               <TableHead>Status</TableHead>
-              {/* <TableHead>Catatan Admin</TableHead> */} {/* Dihapus */}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -122,7 +121,6 @@ const BorrowRequestList: React.FC = () => {
                       {statusDisplay.text}
                     </span>
                   </TableCell>
-                  {/* <TableCell>{request.admin_notes || '-'}</TableCell> */} {/* Dihapus */}
                 </TableRow>
               );
             })}
