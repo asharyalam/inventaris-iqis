@@ -50,7 +50,7 @@ const fetchAllReturnRequests = async (): Promise<ReturnRequest[]> => {
 
 const ReturnRequestsAdminPage: React.FC = () => {
   const queryClient = useQueryClient();
-  const { user } = useSession();
+  const { user, userProfile } = useSession(); // Get userProfile to check roles
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<ReturnRequest | null>(null);
   const [adminNotes, setAdminNotes] = useState('');
@@ -128,6 +128,9 @@ const ReturnRequestsAdminPage: React.FC = () => {
     return <div className="text-center text-red-500">Error: {error.message}</div>;
   }
 
+  const isAdmin = userProfile?.role === 'Admin';
+  const isHeadmaster = userProfile?.role === 'Kepala Sekolah';
+
   const getStatusDisplay = (status: string) => {
     switch (status) {
       case 'Pending':
@@ -174,9 +177,14 @@ const ReturnRequestsAdminPage: React.FC = () => {
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
-                    {request.status === 'Menunggu Persetujuan' && (
+                    {(isAdmin || isHeadmaster) && request.status === 'Menunggu Persetujuan' && (
                       <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
                         Tinjau
+                      </Button>
+                    )}
+                    {((isAdmin || isHeadmaster) && request.status !== 'Menunggu Persetujuan') && (
+                      <Button variant="outline" size="sm" onClick={() => openDialog(request)}>
+                        Lihat Detail
                       </Button>
                     )}
                   </TableCell>
@@ -216,13 +224,18 @@ const ReturnRequestsAdminPage: React.FC = () => {
                   onChange={(e) => setAdminNotes(e.target.value)}
                   className="col-span-3"
                   placeholder="Tambahkan catatan admin..."
+                  readOnly={selectedRequest.status !== 'Menunggu Persetujuan'} // Only editable if pending
                 />
               </div>
             </div>
           )}
           <DialogFooter>
-            <Button variant="destructive" onClick={() => handleAction('Ditolak')}>Tolak</Button>
-            <Button onClick={() => handleAction('Disetujui')}>Setujui</Button>
+            {(isAdmin || isHeadmaster) && selectedRequest?.status === 'Menunggu Persetujuan' && (
+              <>
+                <Button variant="destructive" onClick={() => handleAction('Ditolak')}>Tolak</Button>
+                <Button onClick={() => handleAction('Disetujui')}>Setujui</Button>
+              </>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

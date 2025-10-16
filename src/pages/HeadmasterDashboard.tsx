@@ -3,7 +3,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Handshake, Package, BarChart3 } from 'lucide-react'; // Removed History icon
+import { Handshake, Package, BarChart3, RotateCcw } from 'lucide-react'; // Added RotateCcw icon
 import { useSession } from '@/components/SessionContextProvider';
 
 const HeadmasterDashboard: React.FC = () => {
@@ -32,7 +32,18 @@ const HeadmasterDashboard: React.FC = () => {
           </Card>
         </Link>
 
-        {/* Removed link to /admin/return-requests */}
+        <Link to="/admin/return-requests"> {/* New link for Headmaster */}
+          <Card className="hover:shadow-lg transition-shadow duration-200">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Persetujuan Pengembalian</CardTitle>
+              <RotateCcw className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold">Tinjau</p>
+              <p className="text-xs text-muted-foreground">Setujui atau tolak permintaan pengembalian.</p>
+            </CardContent>
+          </Card>
+        </Link>
 
         <Link to="/admin/consumable-requests">
           <Card className="hover:shadow-lg transition-shadow duration-200">
