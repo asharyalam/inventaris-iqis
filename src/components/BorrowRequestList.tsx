@@ -101,7 +101,7 @@ const BorrowRequestList: React.FC = () => {
               <TableHead>Tanggal Jatuh Tempo</TableHead>
               <TableHead>Tanggal Dikembalikan</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Catatan Admin</TableHead>
+              {/* <TableHead>Catatan Admin</TableHead> */} {/* Dihapus */}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -122,7 +122,7 @@ const BorrowRequestList: React.FC = () => {
                       {statusDisplay.text}
                     </span>
                   </TableCell>
-                  <TableCell>{request.admin_notes || '-'}</TableCell>
+                  {/* <TableCell>{request.admin_notes || '-'}</TableCell> */} {/* Dihapus */}
                 </TableRow>
               );
             })}
