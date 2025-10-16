@@ -63,6 +63,10 @@ const ProfilePage: React.FC = () => {
               </Select>
             </div>
             <div className="space-y-2">
+              <Label htmlFor="position">Jabatan</Label>
+              <Input id="position" value={userProfile?.position || ''} readOnly />
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="role">Peran</Label>
               <Input id="role" value={userProfile?.role || 'Pengguna'} readOnly />
             </div>

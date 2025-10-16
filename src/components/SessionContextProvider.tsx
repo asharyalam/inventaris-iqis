@@ -13,6 +13,7 @@ interface UserProfile {
   instansi: string | null;
   role: string | null;
   avatar_url: string | null;
+  position: string | null; // Added position
 }
 
 interface SessionContextType {
@@ -67,7 +68,7 @@ export const SessionContextProvider = ({ children }: { children: ReactNode }) =>
       }
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, first_name, last_name, instansi, role, avatar_url')
+        .select('id, first_name, last_name, instansi, role, avatar_url, position') // Added position
         .eq('id', user.id)
         .single();
 

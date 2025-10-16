@@ -19,6 +19,7 @@ interface UserProfile {
   role: string | null;
   avatar_url: string | null;
   email: string; // Add email to UserProfile for reset password
+  position: string | null; // Added position
 }
 
 const fetchAllUserProfiles = async (): Promise<UserProfile[]> => {
@@ -32,6 +33,7 @@ const fetchAllUserProfiles = async (): Promise<UserProfile[]> => {
       instansi,
       role,
       avatar_url,
+      position, -- Added position
       auth_users:auth.users(email)
     `)
     .order('first_name', { ascending: true });
@@ -56,6 +58,7 @@ const UserManagementPage: React.FC = () => {
   const [lastName, setLastName] = useState('');
   const [instansi, setInstansi] = useState('');
   const [role, setRole] = useState('');
+  const [position, setPosition] = useState(''); // New state for position
 
   const { data: users, isLoading, error, refetch } = useQuery<UserProfile[], Error>({
     queryKey: ['userProfiles'],
@@ -68,6 +71,7 @@ const UserManagementPage: React.FC = () => {
     setLastName(userProfile.last_name || '');
     setInstansi(userProfile.instansi || '');
     setRole(userProfile.role || 'Pengguna');
+    setPosition(userProfile.position || ''); // Set position
     setIsEditDialogOpen(true);
   };
 
@@ -81,6 +85,7 @@ const UserManagementPage: React.FC = () => {
         last_name: lastName,
         instansi: instansi,
         role: role,
+        position: position, // Update position
       })
       .eq('id', editingUser.id);
 
@@ -132,8 +137,9 @@ const UserManagementPage: React.FC = () => {
             <TableRow>
               <TableHead>Nama Depan</TableHead>
               <TableHead>Nama Belakang</TableHead>
-              <TableHead>Email</TableHead> {/* Display email */}
+              <TableHead>Email</TableHead>
               <TableHead>Instansi</TableHead>
+              <TableHead>Jabatan</TableHead> {/* New Table Head */}
               <TableHead>Peran</TableHead>
               <TableHead className="text-right">Aksi</TableHead>
             </TableRow>
@@ -143,8 +149,9 @@ const UserManagementPage: React.FC = () => {
               <TableRow key={userProfile.id}>
                 <TableCell className="font-medium">{userProfile.first_name || '-'}</TableCell>
                 <TableCell>{userProfile.last_name || '-'}</TableCell>
-                <TableCell>{userProfile.email || '-'}</TableCell> {/* Display email */}
+                <TableCell>{userProfile.email || '-'}</TableCell>
                 <TableCell>{userProfile.instansi || '-'}</TableCell>
+                <TableCell>{userProfile.position || '-'}</TableCell> {/* Display position */}
                 <TableCell>{userProfile.role || 'Pengguna'}</TableCell>
                 <TableCell className="text-right space-x-2">
                   <Button variant="outline" size="sm" onClick={() => handleEditClick(userProfile)}>
@@ -181,6 +188,10 @@ const UserManagementPage: React.FC = () => {
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="instansi" className="text-right">Instansi</Label>
                 <Input id="instansi" value={instansi} onChange={(e) => setInstansi(e.target.value)} className="col-span-3" />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="position" className="text-right">Jabatan</Label> {/* New Input Field */}
+                <Input id="position" value={position} onChange={(e) => setPosition(e.target.value)} className="col-span-3" />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="role" className="text-right">Peran</Label>
