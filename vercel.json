@@ -6,7 +6,7 @@
       "destination": "/index.html"
     }
   ],
-  "installCommand": "rm -f pnpm-lock.yaml && pnpm install",
-  "buildCommand": "npm run build",
+  "installCommand": "pnpm install",
+  "buildCommand": "pnpm run build",
   "outputDirectory": "dist"
 }
