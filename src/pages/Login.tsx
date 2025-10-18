@@ -41,8 +41,9 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 p-10 bg-white rounded-xl shadow-lg">
-        <div className="flex justify-center mb-6">
-          <img src="/favicon.png" alt="Logo Aplikasi" className="h-24 w-24 object-contain" />
+        <div className="text-center mb-6">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Sistem Manajemen Barang SMPIT IQIS</h1>
+          <img src="/favicon.png" alt="Logo Aplikasi" className="h-24 w-24 object-contain mx-auto" />
         </div>
         <Tabs defaultValue="login" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
@@ -50,13 +51,13 @@ const Login = () => {
             <TabsTrigger value="signup">Daftar</TabsTrigger>
           </TabsList>
           <TabsContent value="login">
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            <h2 className="mt-6 text-center text-2xl font-extrabold text-gray-900">
               Masuk ke Akun Anda
             </h2>
             <LoginForm />
           </TabsContent>
           <TabsContent value="signup">
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            <h2 className="mt-6 text-center text-2xl font-extrabold text-gray-900">
               Buat Akun Baru
             </h2>
             <SignUpForm />
