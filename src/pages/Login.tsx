@@ -51,13 +51,13 @@ const Login = () => {
             <TabsTrigger value="signup">Daftar</TabsTrigger>
           </TabsList>
           <TabsContent value="login">
-            <h2 className="mt-6 text-center text-2xl font-extrabold text-gray-900">
+            <h2 className="mt-6 text-center text-xl font-extrabold text-gray-900">
               Masuk ke Akun Anda
             </h2>
             <LoginForm />
           </TabsContent>
           <TabsContent value="signup">
-            <h2 className="mt-6 text-center text-2xl font-extrabold text-gray-900">
+            <h2 className="mt-6 text-center text-xl font-extrabold text-gray-900">
               Buat Akun Baru
             </h2>
             <SignUpForm />
