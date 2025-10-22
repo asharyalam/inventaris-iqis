@@ -50,6 +50,35 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
     return data || [];
   }, [user, isAdmin, isHeadmaster]);
 
+  // Move markAsRead and markAllAsRead declarations before useEffect
+  const markAsRead = useCallback(async (notificationId: string) => {
+    const { error } = await supabase
+      .from('notifications')
+      .update({ is_read: true })
+      .eq('id', notificationId)
+      .eq('recipient_user_id', user?.id); // Ensure user can only mark their own
+
+    if (error) {
+      showError(`Gagal menandai notifikasi sebagai sudah dibaca: ${error.message}`);
+    } else {
+      queryClient.invalidateQueries({ queryKey: ['userNotifications', user?.id] });
+    }
+  }, [user, queryClient]);
+
+  const markAllAsRead = useCallback(async () => {
+    const { error } = await supabase
+      .from('notifications')
+      .update({ is_read: true })
+      .eq('recipient_user_id', user?.id)
+      .eq('is_read', false);
+
+    if (error) {
+      showError(`Gagal menandai semua notifikasi sebagai sudah dibaca: ${error.message}`);
+    } else {
+      queryClient.invalidateQueries({ queryKey: ['userNotifications', user?.id] });
+    }
+  }, [user, queryClient]);
+
   const { data: fetchedNotifications, isLoading: isLoadingNotifications, refetch } = useQuery<Notification[], Error>({
     queryKey: ['userNotifications', user?.id],
     queryFn: fetchNotifications,
@@ -83,8 +112,6 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
             action: {
               label: "Lihat",
               onClick: () => {
-                // Optionally navigate to the related request page
-                // For now, just mark as read
                 markAsRead(newNotification.id);
               },
             },
@@ -97,34 +124,6 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
       supabase.removeChannel(channel);
     };
   }, [user, isAdmin, isHeadmaster, markAsRead]);
-
-  const markAsRead = useCallback(async (notificationId: string) => {
-    const { error } = await supabase
-      .from('notifications')
-      .update({ is_read: true })
-      .eq('id', notificationId)
-      .eq('recipient_user_id', user?.id); // Ensure user can only mark their own
-
-    if (error) {
-      showError(`Gagal menandai notifikasi sebagai sudah dibaca: ${error.message}`);
-    } else {
-      queryClient.invalidateQueries({ queryKey: ['userNotifications', user?.id] });
-    }
-  }, [user, queryClient]);
-
-  const markAllAsRead = useCallback(async () => {
-    const { error } = await supabase
-      .from('notifications')
-      .update({ is_read: true })
-      .eq('recipient_user_id', user?.id)
-      .eq('is_read', false);
-
-    if (error) {
-      showError(`Gagal menandai semua notifikasi sebagai sudah dibaca: ${error.message}`);
-    } else {
-      queryClient.invalidateQueries({ queryKey: ['userNotifications', user?.id] });
-    }
-  }, [user, queryClient]);
 
   return (
     <NotificationContext.Provider value={{ notifications, unreadCount, markAsRead, markAllAsRead, isLoadingNotifications }}>
