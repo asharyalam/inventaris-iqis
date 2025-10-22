@@ -24,7 +24,8 @@ import MonitoringReportingPage from "./pages/MonitoringReportingPage";
 import ProfilePage from "./pages/ProfilePage";
 import ReturnRequestsPage from "./pages/ReturnRequestsPage";
 import ForgotPassword from "./pages/ForgotPassword";
-import AdminDataManagementPage from "./pages/AdminDataManagementPage"; // Import the new AdminDataManagementPage
+import AdminDataManagementPage from "./pages/AdminDataManagementPage";
+import { NotificationProvider } from "./components/NotificationProvider"; // Import NotificationProvider
 
 const queryClient = new QueryClient();
 
@@ -35,38 +36,40 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <SessionContextProvider>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/unauthorized" element={<Unauthorized />} />
+          <NotificationProvider> {/* Wrap AppLayout with NotificationProvider */}
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/unauthorized" element={<Unauthorized />} />
 
-            {/* Public/Redirected Route */}
-            <Route path="/" element={<Index />} />
+              {/* Public/Redirected Route */}
+              <Route path="/" element={<Index />} />
 
-            {/* Protected Routes with Layout */}
-            <Route element={<ProtectedRoute allowedRoles={['Pengguna', 'Admin', 'Kepala Sekolah']} />}>
-              <Route element={<AppLayout />}>
-                <Route path="/dashboard" element={<UserDashboard />} />
-                <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/consumable-requests" element={<ConsumableRequestsPage />} />
-                <Route path="/borrow-requests" element={<BorrowRequestsPage />} />
-                <Route path="/return-requests" element={<ReturnRequestsPage />} />
-                {/* Admin/Headmaster specific routes */}
-                <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                <Route path="/admin/items" element={<ItemList />} />
-                <Route path="/admin/add-item" element={<AddItemForm />} />
-                <Route path="/admin/return-requests" element={<ReturnRequestsAdminPage />} />
-                <Route path="/admin/borrow-requests" element={<BorrowRequestsAdminPage />} />
-                <Route path="/admin/consumable-requests" element={<AdminConsumableRequestsPage />} />
-                <Route path="/admin/users" element={<UserManagementPage />} />
-                <Route path="/admin/monitoring-reporting" element={<MonitoringReportingPage />} />
-                <Route path="/admin/data-management" element={<AdminDataManagementPage />} /> {/* New Admin Data Management Route */}
+              {/* Protected Routes with Layout */}
+              <Route element={<ProtectedRoute allowedRoles={['Pengguna', 'Admin', 'Kepala Sekolah']} />}>
+                <Route element={<AppLayout />}>
+                  <Route path="/dashboard" element={<UserDashboard />} />
+                  <Route path="/profile" element={<ProfilePage />} />
+                  <Route path="/consumable-requests" element={<ConsumableRequestsPage />} />
+                  <Route path="/borrow-requests" element={<BorrowRequestsPage />} />
+                  <Route path="/return-requests" element={<ReturnRequestsPage />} />
+                  {/* Admin/Headmaster specific routes */}
+                  <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                  <Route path="/admin/items" element={<ItemList />} />
+                  <Route path="/admin/add-item" element={<AddItemForm />} />
+                  <Route path="/admin/return-requests" element={<ReturnRequestsAdminPage />} />
+                  <Route path="/admin/borrow-requests" element={<BorrowRequestsAdminPage />} />
+                  <Route path="/admin/consumable-requests" element={<AdminConsumableRequestsPage />} />
+                  <Route path="/admin/users" element={<UserManagementPage />} />
+                  <Route path="/admin/monitoring-reporting" element={<MonitoringReportingPage />} />
+                  <Route path="/admin/data-management" element={<AdminDataManagementPage />} />
+                </Route>
               </Route>
-            </Route>
 
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </NotificationProvider>
         </SessionContextProvider>
       </BrowserRouter>
     </TooltipProvider>

@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import { showSuccess, showError } from '@/utils/toast';
+import NotificationBell from './NotificationBell'; // Import NotificationBell
 
 interface NavItem {
   title: string;
@@ -70,7 +71,7 @@ const SidebarContent: React.FC<{ userRole: string | null; closeSheet?: () => voi
 };
 
 const AppLayout: React.FC = () => {
-  const { session, userProfile, isLoading, canAccessAdminDashboard } = useSession();
+  const { session, userProfile, isLoading, canAccessAdminDashboard, isAdmin, isHeadmaster } = useSession();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -163,6 +164,7 @@ const AppLayout: React.FC = () => {
             {/* You can add a search bar or other header elements here */}
           </div>
           <div className="flex items-center gap-2">
+            {(isAdmin || isHeadmaster) && <NotificationBell />} {/* Add NotificationBell here */}
             <span className="text-sm font-medium">{userProfile?.first_name || 'Pengguna'} ({userRole})</span>
             {!isMobile && (
               <Button variant="ghost" size="icon" onClick={handleLogout}>
