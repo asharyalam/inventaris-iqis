@@ -28,7 +28,7 @@ interface NotificationContextType {
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
 export const NotificationProvider = ({ children }: { children: ReactNode }) => {
-  const { user, isLoading: isLoadingSession, isAdmin, isHeadmaster } = useSession();
+  const { user, isLoading, isAdmin, isHeadmaster } = useSession(); // Menggunakan isLoading dari useSession
   const queryClient = useQueryClient();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -50,7 +50,6 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
     return data || [];
   }, [user, isAdmin, isHeadmaster]);
 
-  // Move markAsRead and markAllAsRead declarations before useEffect
   const markAsRead = useCallback(async (notificationId: string) => {
     const { error } = await supabase
       .from('notifications')
@@ -82,15 +81,21 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   const { data: fetchedNotifications, isLoading: isLoadingNotifications, refetch } = useQuery<Notification[], Error>({
     queryKey: ['userNotifications', user?.id],
     queryFn: fetchNotifications,
-    enabled: !!user && (isAdmin || isHeadmaster) && !isLoadingSession,
+    enabled: !!user && !isLoading && (isAdmin || isHeadmaster), // Kondisi enabled yang lebih ketat
     onSuccess: (data) => {
       setNotifications(data);
       setUnreadCount(data.filter(n => !n.is_read).length);
     },
+    onError: (error) => {
+      console.error("NotificationProvider: Error fetching notifications:", error);
+    }
   });
 
   useEffect(() => {
-    if (!user || (!isAdmin && !isHeadmaster)) return;
+    // Hanya berlangganan jika pengguna ada, sesi dan profil telah dimuat, dan pengguna adalah Admin atau Kepala Sekolah
+    if (!user || isLoading || (!isAdmin && !isHeadmaster)) {
+      return;
+    }
 
     const channel = supabase
       .channel(`notifications_for_user_${user.id}`)
@@ -123,7 +128,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, isAdmin, isHeadmaster, markAsRead]);
+  }, [user, isLoading, isAdmin, isHeadmaster, markAsRead]); // Menambahkan isLoading ke dependencies
 
   return (
     <NotificationContext.Provider value={{ notifications, unreadCount, markAsRead, markAllAsRead, isLoadingNotifications }}>
