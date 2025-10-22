@@ -77,11 +77,20 @@ const AppLayout: React.FC = () => {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      showError(`Gagal keluar: ${error.message}`);
+    // Check if there's an active session before attempting to sign out
+    const { data: { session: currentSession } } = await supabase.auth.getSession();
+
+    if (currentSession) {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        showError(`Gagal keluar: ${error.message}`);
+      } else {
+        showSuccess("Anda telah berhasil keluar.");
+        navigate('/login', { replace: true });
+      }
     } else {
-      showSuccess("Anda telah berhasil keluar.");
+      // If no session is found, assume user is already logged out or session expired
+      showSuccess("Anda telah berhasil keluar."); // Or a message like "Sesi Anda telah berakhir."
       navigate('/login', { replace: true });
     }
   };
